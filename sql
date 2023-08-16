@@ -1,3 +1,5 @@
+/*mettere not null ovunque/
+
 CREATE DATABASE mydatabase; /*creating the database*/()
 USE mydatabase;
 
@@ -15,9 +17,13 @@ CREATE TABLE Person (
 );
 CREATE TABLE Publication(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    publicationYear INT,
-    title VARCHAR(255),
+    title VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    publicationYear INT NOT NULL,
+    issue INT, /*i select issue as part of the broader element*/
+    volume INT, /* volume is moved from JournalArticle to the broader element to normalize the data*/
     citesPublicationId INT,
+    chapter INT NOT NULL, /*moved from BookChapter*/
     FOREIGN KEY (citesPublicationId) REFERENCES Publication(id) /*self-referential relationship where a publication can reference another publication that it cites*/
 );
 CREATE TABLE PublicationAuthor( /*many-to-many relationship*/
@@ -30,14 +36,11 @@ CREATE TABLE PublicationAuthor( /*many-to-many relationship*/
 CREATE TABLE JournalArticle (
     id INT PRIMARY KEY AUTO_INCREMENT,
     publicationId INT,
-    issue VARCHAR (255),
-    volume VARCHAR (255),
     FOREIGN KEY (publicationId) REFERENCES Publication (id)
 );
 CREATE TABLE BookChapter (
     id INT PRIMARY KEY AUTO_INCREMENT,
     publicationId INT,
-    chapterNumber INT NOT NULL,
     FOREIGN KEY (publicationId) REFERENCES Publication (id)
 );
 
@@ -88,11 +91,30 @@ CREATE TABLE Book (
 );
 
 CREATE TABLE Journal (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id VARCHAR(255) PRIMARY KEY,
     venueId INT,
     FOREIGN KEY (venueId) REFERENCES Venue (id)
 );
 
+CREATE TABLE venue_type (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    bookId INT,
+    journalId VARCHAR(255),
+    proceedingsId INT,
+    FOREIGN KEY (bookId) REFERENCES Book(id),
+    FOREIGN KEY (journalId) REFERENCES Journal(id),
+    FOREIGN KEY (proceedingsId) REFERENCES Proceedings(id)
+);
+
+LOAD DATA INFILE './relational_publications.csv'
+INTO TABLE Publication /* Target table for csv file*/
+FIELDS TERMINATED BY ',' /* columns separated by commas*/
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES /*ignore 1st line: headers*/
+(id, title, type, publication_year, issue, volume, chapter, @venue_name, venue_type, @publisher_id, event)
+SET venue_id /*set the "venue_id" column in the "Publications" table*/= (SELECT id FROM Venues WHERE name = @venue_name),
+    publisher_id = (SELECT id FROM Publishers WHERE id = @publisher_id);
 
 
 
