@@ -13,19 +13,34 @@ CREATE TABLE Person (
     familyName VARCHAR(255) NOT NULL,
     FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity (id)
 );
+CREATE TABLE Publication(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    publicationYear INT,
+    title VARCHAR(255),
+    citesPublicationId INT,
+    FOREIGN KEY (citesPublicationId) REFERENCES Publication(id) /*self-referential relationship where a publication can reference another publication that it cites*/
+);
+CREATE TABLE PublicationAuthor( /*many-to-many relationship*/
+    publicationId INT, /*These columns will hold the foreign key references to the "Publication" and "Person" entitie*/
+    authorId INT,
+    PRIMARY KEY (publicationId, authorId),
+    FOREIGN KEY (publicationId) REFERENCES Publication(id),
+    FOREIGN KEY (authorId) REFERENCES Person(id)
+);
+
 CREATE TABLE Organization (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    identifiableEntityId VARCHAR(255),
+    publisherId VARCHAR(255),
     name VARCHAR(255) NOT NULL, 
-    FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity (id)
+    FOREIGN KEY (publisherId) REFERENCES IdentifiableEntity (id)
 );
-
-CREATE TABLE Publisher (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    identifiableEntityId VARCHAR(255),
-    FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity (id)
+CREATE TABLE PublisherEntity (
+    organizationId INT,
+    identifiableEntityId INT,
+    PRIMARY KEY (organizationId, identifiableEntityId),
+    FOREIGN KEY (organizationId) REFERENCES Organization(id),
+    FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity(id)
 );
-
 CREATE TABLE Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
     identifiableEntityId VARCHAR(255),
@@ -34,7 +49,13 @@ CREATE TABLE Venue (
     FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity (id),
     FOREIGN KEY (organizationId) REFERENCES Organization (id)
 );
-
+CREATE TABLE PublicationVenue (
+    publicationId INT,
+    venueId INT,
+    PRIMARY KEY (publicationId, venueId),
+    FOREIGN KEY (publicationId) REFERENCES Publication(id),
+    FOREIGN KEY (venueId) REFERENCES Venue(id)
+);
 CREATE TABLE Proceedings (
     id INT PRIMARY KEY AUTO_INCREMENT,
     venueId INT,
@@ -65,25 +86,13 @@ CREATE TABLE JournalArticle (
     publicationId INT,
     issue VARCHAR (255),
     volume VARCHAR (255),
-    FOREIGN KEY (PublicationId) REFERENCES Publication (id)
+    FOREIGN KEY (publicationId) REFERENCES Publication (id)
+);
+CREATE TABLE ProceedingsPaper (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    publicationId INT,
+    FOREIGN KEY (publicationId) REFERENCES Publication (id)
 );
 
 
 
-
-
-
-
-CREATE TABLE Publication (
-    doi VARCHAR(255) PRIMARY KEY, /*Data type VARCHAR holding upto 255 characters, this column will be the primary row in the table*/
-    title VARCHAR(255), /*column name*/
-    type VARCHAR (50), /*journal, article, bookchapter, other */
-    publication_year INT, 
-    issue VARCHAR(50),
-    volume VARCHAR(50),
-    chapter VARCHAR(50),
-    venue_id INT,
-    publisher_id INT,
-    FOREIGN KEY (venue_id) REFERENCES Venues(id), /*defines a relationship between the venue_id of the Publications table and the id of the Venues table*/
-    FOREIGN KEY (publisher_id) REFERENCES Publishers (id)
-);
