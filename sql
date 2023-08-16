@@ -27,7 +27,25 @@ CREATE TABLE PublicationAuthor( /*many-to-many relationship*/
     FOREIGN KEY (publicationId) REFERENCES Publication(id),
     FOREIGN KEY (authorId) REFERENCES Person(id)
 );
+CREATE TABLE JournalArticle (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    publicationId INT,
+    issue VARCHAR (255),
+    volume VARCHAR (255),
+    FOREIGN KEY (publicationId) REFERENCES Publication (id)
+);
+CREATE TABLE BookChapter (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    publicationId INT,
+    chapterNumber INT NOT NULL,
+    FOREIGN KEY (publicationId) REFERENCES Publication (id)
+);
 
+CREATE TABLE ProceedingsPaper (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    publicationId INT,
+    FOREIGN KEY (publicationId) REFERENCES Publication (id)
+);
 CREATE TABLE Organization (
     id INT PRIMARY KEY AUTO_INCREMENT,
     publisherId VARCHAR(255),
@@ -44,7 +62,7 @@ CREATE TABLE PublisherEntity (
 CREATE TABLE Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
     identifiableEntityId VARCHAR(255),
-    organizationName VARCHAR(255),
+    organizationId VARCHAR(255),
     title VARCHAR(255),
     FOREIGN KEY (identifiableEntityId) REFERENCES IdentifiableEntity (id),
     FOREIGN KEY (organizationId) REFERENCES Organization (id)
@@ -75,24 +93,7 @@ CREATE TABLE Journal (
     FOREIGN KEY (venueId) REFERENCES Venue (id)
 );
 
-CREATE TABLE BookChapter (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    publicationId INT,
-    chapterNumber INT NOT NULL,
-    FOREIGN KEY (publicationId) REFERENCES Publication (id)
-);
-CREATE TABLE JournalArticle (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    publicationId INT,
-    issue VARCHAR (255),
-    volume VARCHAR (255),
-    FOREIGN KEY (publicationId) REFERENCES Publication (id)
-);
-CREATE TABLE ProceedingsPaper (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    publicationId INT,
-    FOREIGN KEY (publicationId) REFERENCES Publication (id)
-);
+
 
 
 
