@@ -3,6 +3,8 @@
 CREATE DATABASE mydatabase; /*creating the database*/()
 USE mydatabase;
 
+/*data from JSON contains info about publishers, references, venues, and authors*/
+
 CREATE TABLE IdentifiableEntity (
     id VARCHAR(255) PRIMARY KEY
 );
