@@ -1,4 +1,5 @@
-# Defining data model classes
+# Defining data model classes based on SQL schema and their relationships 
+
 
 #__init__ is a method called constructor called whenever you create an instance/object of a class
 # self refers to the instance being created
