@@ -1,38 +1,31 @@
-#  define the classes responsible for handling data and querying
+# Import the sqlite3 module for working with SQLite databases
 import sqlite3
 
 # Base class for common methods to manage database connections
-class DataManager: 
+class DataManager:
     def __init__(self):
         self.dbPath = ""
         self.endpointUrl = ""
 
-    def setDbPath(self, dbPath): # it has attribute dbPath #method setDbPath to set the value of the attribute
+    def setDbPath(self, dbPath):
         self.dbPath = dbPath
 
-    def getDbPath(self): # method used to retrieve the DbPath
+    def getDbPath(self):
         return self.dbPath
 
-    def setEndpointUrl(self, endpointUrl): # attribute endpointUrl
+    def setEndpointUrl(self, endpointUrl):
         self.endpointUrl = endpointUrl
 
     def getEndpointUrl(self):
         return self.endpointUrl
 
 # Class for handling relational data
-class RelationalDataProcessor(DataManager): # this class inherits the attributes and methods defined in the base class
+class RelationalDataProcessor(DataManager):
+    #this class inherits the attributes and methods defined in the base class
     #manages interactions with a relational database
     def uploadData(self, filePath):
-        # Implement data upload logic for relational database
-        print(f"Uploading data from {filePath} to relational database") 
-        # the f before the string indicates an f-string allowig to embed the values of variables directly into the string
-        #call this method and provide a filePath to display a message indicating that data is being uploaded from that specific file to the relational database
-
-# Class for handling triplestore data
-class TriplestoreDataProcessor(DataManager):
-    def uploadData(self, filePath):
-        conn = None  # Database connection #variable used to store the database connection object
-        try: # try block
+        conn = None  # Initialize the database connection to None
+        try:
             conn = open_database_connection(self.dbPath)  # Open a connection to the database
             
             # Read data from the file and insert it into the database
@@ -48,17 +41,30 @@ class TriplestoreDataProcessor(DataManager):
             if conn:
                 close_database_connection(conn)  # Close the database connection
 
-# You need to implement the specific functions for opening, inserting, and closing database connections,
-# as well as parsing and inserting data into the database.
+# Class for handling triplestore data
+class TriplestoreDataProcessor(DataManager):
+    def uploadData(self, filePath):
+        triples = []  # Store parsed triples here
+        
+        # Read data from the file and parse it into triples
+        with open(filePath, 'r') as file:
+            for line in file:
+                subject, predicate, obj = line.strip().split(',')  # Parse the line into subject, predicate, object
+                triples.append((subject, predicate, obj))
+        
+        # Upload the triples to the triplestore
+        for triple in triples:
+            subject, predicate, obj = triple
+            # Perform the actual upload to the triplestore using a triplestore API or library
+            
+        print(f"Uploaded {len(triples)} triples to the triplestore")
 
 # Class for querying relational data
 class RelationalQueryProcessor:
-    def getPublicationsPublishedInYear(self, year):
-        # Implement query logic for getting publications by year from relational database
+    def getPublicationsPublishedInYear(self, year): # Implement query logic for getting publications by year from relational database
         print(f"Getting publications published in year {year}")
 
     def getPublicationsByAuthorId(self, authorId):
-        # Implement query logic for getting publications by author id from relational database
         print(f"Getting publications by author id {authorId}")
 
     # ... implement other query methods ...
@@ -66,25 +72,25 @@ class RelationalQueryProcessor:
 # Class for querying triplestore data
 class TriplestoreQueryProcessor:
     def getMostCitedPublication(self):
-        # Implement query logic for getting most cited publication from triplestore
         print("Getting most cited publication")
 
     def getMostCitedVenue(self):
-        # Implement query logic for getting most cited venue from triplestore
         print("Getting most cited venue")
 
     # ... implement other query methods ...
 
-
-#implement the open_database_connection
+# Define the function to open a database connection
 def open_database_connection(db_path):
-    try: # the following code might raise exceptions that need to be handled
-        conn = sqlite3.connect(db_path) #conn object
-        print("Database connection opened") 
+    try:
+        conn = sqlite3.connect(db_path)  # Establish a connection to the SQLite database
+        print("Database connection opened")
         return conn
-    except sqlite3.Error as e: #f an exception of type sqlite3.Error occurs within the try block, this except block is executed
-        print(f"Error opening database connection: {e}") #the variable e holds the exception object #f-string) is used to create the error message.
+    except sqlite3.Error as e:
+        print(f"Error opening database connection: {e}")
         return None
+
+# Usage
+# ... create instances of data processors and perform data operations ...
 
 # Usage
 relational_data_processor = RelationalDataProcessor()
