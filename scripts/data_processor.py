@@ -1,4 +1,5 @@
 #  define the classes responsible for handling data and querying
+import sqlite3
 
 # Base class for common methods to manage database connections
 class DataManager: 
@@ -30,8 +31,25 @@ class RelationalDataProcessor(DataManager): # this class inherits the attributes
 # Class for handling triplestore data
 class TriplestoreDataProcessor(DataManager):
     def uploadData(self, filePath):
-        # Implement data upload logic for triplestore
-        print(f"Uploading data from {filePath} to triplestore")
+        conn = None  # Database connection #variable used to store the database connection object
+        try: # try block
+            conn = open_database_connection(self.dbPath)  # Open a connection to the database
+            
+            # Read data from the file and insert it into the database
+            with open(filePath, 'r') as file:
+                for line in file:
+                    data = parse_line(line)  # Parse the line into data fields
+                    insert_data_into_database(conn, data)  # Insert data into appropriate tables
+                    
+            print(f"Uploaded data from {filePath} to the relational database")
+        except Exception as e:
+            print(f"Error uploading data: {e}")
+        finally:
+            if conn:
+                close_database_connection(conn)  # Close the database connection
+
+# You need to implement the specific functions for opening, inserting, and closing database connections,
+# as well as parsing and inserting data into the database.
 
 # Class for querying relational data
 class RelationalQueryProcessor:
@@ -56,6 +74,17 @@ class TriplestoreQueryProcessor:
         print("Getting most cited venue")
 
     # ... implement other query methods ...
+
+
+#implement the open_database_connection
+def open_database_connection(db_path):
+    try: # the following code might raise exceptions that need to be handled
+        conn = sqlite3.connect(db_path) #conn object
+        print("Database connection opened") 
+        return conn
+    except sqlite3.Error as e: #f an exception of type sqlite3.Error occurs within the try block, this except block is executed
+        print(f"Error opening database connection: {e}") #the variable e holds the exception object #f-string) is used to create the error message.
+        return None
 
 # Usage
 relational_data_processor = RelationalDataProcessor()
