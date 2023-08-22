@@ -41,8 +41,7 @@ class RelationalDataProcessor(DataManager): #inerits DataManager
             if conn:
                 close_database_connection(conn)  # Close the database connection
 
-# Class for handling triplestore data
-class TriplestoreDataProcessor(DataManager):
+class TriplestoreDataProcessor(DataManager): #handles interactions with a triplestore
     def uploadData(self, filePath):
         triples = []  # Store parsed triples here
         
