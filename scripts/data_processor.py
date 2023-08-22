@@ -1,8 +1,11 @@
 # Import the sqlite3 module for working with SQLite databases
 import sqlite3
 
-# Base class for common methods to manage database connections
-class DataManager:
+
+# A class is a blueprint for creating objects
+# utility classes that you've defined to handle specific tasks related to managing and querying the data
+
+class DataManager: # Base class for common methods to manage database connections
     def __init__(self):
         self.dbPath = ""
         self.endpointUrl = ""
@@ -19,11 +22,8 @@ class DataManager:
     def getEndpointUrl(self):
         return self.endpointUrl
 
-# Class for handling relational data
-class RelationalDataProcessor(DataManager):
-    #this class inherits the attributes and methods defined in the base class
-    #manages interactions with a relational database
-    def uploadData(self, filePath):
+class RelationalDataProcessor(DataManager): #inerits DataManager
+    def uploadData(self, filePath): #method that reads data and inserts it into the relational database
         conn = None  # Initialize the database connection to None
         try:
             conn = open_database_connection(self.dbPath)  # Open a connection to the database
@@ -98,7 +98,7 @@ relational_data_processor.setDbPath("path/to/relational.db")
 relational_data_processor.uploadData("data/relational_data.csv")
 
 triplestore_data_processor = TriplestoreDataProcessor()
-triplestore_data_processor.setEndpointUrl("http://example.com/sparql")
+triplestore_data_processor.setEndpointUrl("http://example.com/sparql") #endpointURL url of my SPARQL
 triplestore_data_processor.uploadData("data/triplestore_data.json")
 
 relational_query_processor = RelationalQueryProcessor()

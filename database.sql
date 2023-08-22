@@ -1,5 +1,6 @@
 CREATE DATABASE pabloale;
 USE pabloale;
+-- Higher level casses representing the entity-relationship model of the data
 
 /* Entities from CSV data */
 CREATE TABLE Publisher (
