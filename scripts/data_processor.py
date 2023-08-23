@@ -42,14 +42,16 @@ class RelationalDataProcessor(DataManager): #inerits DataManager
                 close_database_connection(conn)  # Close the database connection
 
 class TriplestoreDataProcessor(DataManager): #handles interactions with a triplestore
-    def uploadData(self, filePath):
+    #triplestore = database optimized to store and query RDF triples
+    def uploadData(self, filePath): 
         triples = []  # Store parsed triples here
         
         # Read data from the file and parse it into triples
+        #The with statement ensures that the file is properly closed after its suite (indented block) is executed
         with open(filePath, 'r') as file:
             for line in file:
-                subject, predicate, obj = line.strip().split(',')  # Parse the line into subject, predicate, object
-                triples.append((subject, predicate, obj))
+                subject, predicate, obj = line.strip().split(',')  # splits the line into 3 components: subject, predicate, object
+                triples.append((subject, predicate, obj)) # Appends a tuple (subject, predicate, obj) to the triples list. This tuple represents a RDF triple.
         
         # Upload the triples to the triplestore
         for triple in triples:
