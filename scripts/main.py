@@ -2,7 +2,7 @@
 # instantiate the data processors, set paths, upload data and perform queries using the classes defined in models.py and data_processor.py
 
 from models import RelationalDataProcessor
-from populate import open_database_connection, insert_data_into_database, close_database_connection
+from populate import open_database_connection, insert_data_into_database, close_database_connection, parse_line
 
 # Create an instance of RelationalDataProcessor
 relational_data_processor = RelationalDataProcessor()
