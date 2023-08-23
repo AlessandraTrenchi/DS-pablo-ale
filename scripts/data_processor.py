@@ -1,7 +1,9 @@
 # Import the sqlite3 module for working with SQLite databases
 import sqlite3
-
-
+from populate import parse_line, insert_data_into_database, close_database_connection
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.automap import automap_base
 # A class is a blueprint for creating objects
 # utility classes that you've defined to handle specific tasks related to managing and querying the data
 
