@@ -58,8 +58,7 @@ class TriplestoreDataProcessor(DataManager): #handles interactions with a triple
         # Upload the triples to the triplestore
         for triple in triples:
             subject, predicate, obj = triple
-            # Perform the actual upload to the triplestore using a triplestore API or library
-            
+            upload_to_triplestore(subject, predicate, obj)
         print(f"Uploaded {len(triples)} triples to the triplestore")
 
 # Class for querying relational data
