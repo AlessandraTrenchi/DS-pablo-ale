@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[199]:
+# In[372]:
 
 
 # Starting with necessary imports
@@ -13,7 +13,7 @@ from urllib.parse import quote
 from urllib.parse import unquote  
 
 
-# In[200]:
+# In[377]:
 
 
 def decode_percent_encoding(s):
@@ -67,7 +67,7 @@ with open(output_json_path, 'w') as f:
     json.dump(normalized_data, f)
 
 
-# In[201]:
+# In[378]:
 
 
 def decode_percent_encoding(s):
@@ -105,7 +105,7 @@ output_csv_path = "/Users/juanpablocasadobissone/Downloads/graph_publications_cl
 normalize_csv(input_csv_path, output_csv_path)
 
 
-# In[202]:
+# In[386]:
 
 
 class TriplestoreDataProcessor:
@@ -170,10 +170,10 @@ class TriplestoreDataProcessor:
         triples = []
         base_uri = "http://schema.org/"
         custom_base_uri = "https://github.com/AlessandraTrenchi/DS-pablo-ale/relationaldb/"
-
+    
         if isinstance(data, pd.DataFrame):  # For CSV data
+            print(f"Available columns in DataFrame: {data.columns}")  # Debugging l
             for _, row in data.iterrows():
-               
                 # Construct the URI for the publication
                 publication_uri = f"<{base_uri}publication/{row['id']}>"
                 
@@ -181,57 +181,120 @@ class TriplestoreDataProcessor:
                 triples.append(f"{publication_uri} a <{base_uri}ScholarlyArticle> .")
                 triples.append(f"{publication_uri} <{base_uri}headline> \"{row['title']}\" .")
                 triples.append(f"{publication_uri} <{base_uri}datePublished> \"{row['publication_year']}\" .")
+                
                 if not pd.isna(row['issue']):
                     triples.append(f"{publication_uri} <{base_uri}issueNumber> \"{row['issue']}\" .")
                 if not pd.isna(row['volume']):
                     triples.append(f"{publication_uri} <{base_uri}volumeNumber> \"{row['volume']}\" .")
                 if not pd.isna(row['chapter']):
                     triples.append(f"{publication_uri} <{base_uri}chapter> \"{row['chapter']}\" .")
+                
                 if not pd.isna(row['publication_venue']):
                     triples.append(f"{publication_uri} <{base_uri}isPartOf> <{base_uri}venue/{row['publication_venue']}> .")
+                    venue_uri = f"<{base_uri}venue/{row['publication_venue']}>"
+                    triples.append(f"{venue_uri} a <{base_uri}Venue> .")
+                    triples.append(f"{venue_uri} <http://www.w3.org/2000/01/rdf-schema#label> \"{row['publication_venue'].replace('%20', ' ')}\" .")
+                    triples.append(f"{venue_uri} <http://schema.org/humanReadableID> \"{row['publication_venue'].replace('%20', ' ')}\" .")
+                
+                
+                if not pd.isna(row['issue']):
+                    issue_uri = f"<{base_uri}issue/{row['id']}>"
+                    triples.append(f"{issue_uri} a <{base_uri}PublicationIssue> .")
+                    triples.append(f"{issue_uri} <{base_uri}headline> \"{row['issue']}\" .")
+                    triples.append(f"{publication_uri} <{base_uri}isPartOf> {issue_uri} .")
+                    
+                if not pd.isna(row['volume']):
+                    volume_uri = f"<{base_uri}volume/{row['id']}>"
+                    triples.append(f"{volume_uri} a <{base_uri}PublicationVolume> .")
+                    triples.append(f"{volume_uri} <{base_uri}headline> \"{row['volume']}\" .")
+                    triples.append(f"{publication_uri} <{base_uri}isPartOf> {volume_uri} .")
+                 
+                
+                
                 if not pd.isna(row['venue_type']):
-                    triples.append(f"{publication_uri} <{base_uri}type> <{base_uri}{row['venue_type']}> .")
-                if not pd.isna(row['publisher']):
-                    triples.append(f"{publication_uri} <{base_uri}publisher> <{base_uri}publisher/{row['publisher']}> .")
+                    venue_uri = f"<{base_uri}venue/{row['publication_venue']}>"
+                    
+                    # Generalize this line to adapt to any venue_type
+                    triples.append(f"{venue_uri} a <{base_uri}{row['venue_type']}> .")
+
+                    if not pd.isna(row['venue_type']) and not pd.isna(row['publisher']):
+                        venue_uri = f"<{base_uri}venue/{row['publication_venue']}>"
+                        normalized_publisher_id = row['publisher'].split(":")[-1]  # Get the last part after ':'
+                        publisher_uri = f"<{base_uri}publisher/{normalized_publisher_id}>"
+                        
+                        # Add this line to link the venue to the publisher
+                        triples.append(f"{venue_uri} <{base_uri}publisher> {publisher_uri} .")
+
+
+                    # Add the venue name (same as publication_venue in this case)
+                    if not pd.isna(row['publication_venue']):
+                        triples.append(f"{venue_uri} <{base_uri}name> \"{row['publication_venue'].replace('%20', ' ')}\" .")
+
+                    # Extract and normalize publisher ID from CSV
+                    if not pd.isna(row['publisher']):
+                        normalized_publisher_id = row['publisher'].split(":")[-1]  # Get the last part after ':'
+                        publisher_uri = f"<{base_uri}publisher/{normalized_publisher_id}>"
+                        triples.append(f"{publisher_uri} a <{base_uri}Publisher> .")
+
+                    # Add the publisher's name if it is available.
+                    # Replace 'publisher_name' with the actual column name from your DataFrame that contains the publisher's name.
+                    if not pd.isna(row['publisher']):
+                        triples.append(f"{publisher_uri} <{base_uri}name> \"{row['publisher']}\" .")
+                
                 if not pd.isna(row['event']):
                     triples.append(f"{publication_uri} <{base_uri}about> <{base_uri}event/{row['event']}> .")
+        
             return triples
+
             
         # Handling JSON data
         else:
             for pub_id, authors in data['authors'].items():
                 for author in authors:
-                    author_uri = f"<{self.base_uri}author/{author['orcid']}>"
-            
+                    author_uri = f"<{base_uri}author/{author['orcid']}>"
+                
                     # This is the line that was missing, specifying the type as Author
-                    triples.append(f"{author_uri} a <{self.base_uri}Author> .")  # <-- ADDED BACK
-            
+                    triples.append(f"{author_uri} a <{base_uri}Author> .")  # <-- ADDED BACK
+                
                     # Add these lines to create triples for 'family', 'given', and 'orcid'
-                    triples.append(f"{author_uri} <{self.base_uri}familyName> \"{author['family']}\" .")
-                    triples.append(f"{author_uri} <{self.base_uri}givenName> \"{author['given']}\" .")
-                    triples.append(f"{author_uri} <{self.base_uri}orcid> \"{author['orcid']}\" .")
-            
-                    # Moved this line inside the author loop
-                    triples.append(f"<{self.base_uri}publication/{pub_id}> <{self.base_uri}author> {author_uri} .")  # <-- MOVED HERE
+                    triples.append(f"{author_uri} <{base_uri}familyName> \"{author['family']}\" .")
+                    triples.append(f"{author_uri} <{base_uri}givenName> \"{author['given']}\" .")
+                    triples.append(f"{author_uri} <{base_uri}orcid> \"{author['orcid']}\" .")
         
-                    
+                    # Add this line to create a triple for 'name' which is a combination of 'given' and 'family'
+                    full_name = f"{author['given']} {author['family']}"
+                    triples.append(f"{author_uri} <{base_uri}name> \"{full_name}\" .")  
+                    # Moved this line inside the author loop
+                    triples.append(f"<{base_uri}publication/{pub_id}> <{base_uri}author> {author_uri} .")  
+
+
+            for pub_id, references in data['references'].items():
+                publication_uri = f"<{base_uri}publication/{pub_id}>"
+                for reference_id in references:
+                    reference_uri = f"<{base_uri}publication/{reference_id}>"
+                    triples.append(f"{reference_uri} <{base_uri}citation> {publication_uri} .")
+
+            
                             
             # Convert venues_id data to triples
             for pub_id, venue_ids in data['venues_id'].items():
                 for venue_id in venue_ids:
-                    triples.append(f"<{self.base_uri}{pub_id}> <{self.base_uri}venue> <{self.base_uri}venue/{venue_id}> .")
+                    decoded_venue_id = unquote(venue_id)  # Decode percent-encoded characters
+                    triples.append(f"<{base_uri}{pub_id}> <{base_uri}venue> <{base_uri}venue/{decoded_venue_id}> .")
                     
             # Convert publishers data to triples
             for publisher_id, publisher_details in data['publishers'].items():
-                publisher_uri = f"<{self.base_uri}publisher/{publisher_id}>"
-                triples.append(f"{publisher_uri} <{self.base_uri}type> <{self.base_uri}Publisher> .")
-                triples.append(f"{publisher_uri} <{self.base_uri}name> \"{publisher_details['name']}\" .")
+                normalized_publisher_id = publisher_id.split(":")[-1]  # Get the last part after ':'
+                publisher_uri = f"<{base_uri}publisher/{normalized_publisher_id}>"
+                triples.append(f"{publisher_uri} <{base_uri}type> <{self.base_uri}Publisher> .")
+                triples.append(f"{publisher_uri} <{base_uri}name> \"{publisher_details['name']}\" .")
+
                 
         # Debugging: Print some triples
         print("Debugging: Some generated triples:")
         print(triples[:10])  # Print first 10 triples
         
-        return triples  # Don't forget to return the triples
+        return triples 
     def upload_triples_to_store(self, triples):
         print("Inside upload_triples_to_store method")
         
@@ -330,22 +393,24 @@ class TriplestoreDataProcessor:
 
         results = sparql.query().convert()
         return results['results']['bindings']
-
+    
     def getVenuesByPublisherId(self, publisher_id):
-        sparql_query = f'''
+        sparql_query = f"""
         SELECT ?venue ?name WHERE {{
-            ?venue <http://schema.org/type> <http://schema.org/Periodical> ;
-                   <http://schema.org/publisher> <{publisher_id}> ;
+            ?venue a ?type ;
+                   <http://schema.org/publisher> <http://schema.org/publisher/{publisher_id}> ;
                    <http://schema.org/name> ?name .
-        }}
-        '''
-
+        }} LIMIT 10
+        """
+        
         sparql = SPARQLWrapper(self.endpointUrl)
         sparql.setQuery(sparql_query)
         sparql.setReturnFormat(JSON)
-
+        
         results = sparql.query().convert()
         return results['results']['bindings']
+    
+
 
     def getPublicationInVenue(self, venue_id):
         sparql_query = f'''
@@ -506,7 +571,39 @@ class TriplestoreDataProcessor:
         return results['results']['bindings']
 
 
-# In[204]:
+    def getPublicationsByAuthorFamilyName(self, family_name):
+        sparql_query = f'''
+        SELECT ?publication ?title WHERE {{
+            ?author <{self.base_uri}familyName> "{family_name}" ;
+                    <{self.base_uri}type> <{self.base_uri}Author> .
+            ?publication <{self.base_uri}author> ?author ;
+                        <{self.base_uri}headline> ?title .
+        }}
+        '''
+        sparql = SPARQLWrapper(self.endpointUrl)
+        sparql.setQuery(sparql_query)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        return results['results']['bindings']
+
+    def getPublicationsByAuthorGivenName(self, given_name):
+        sparql_query = f'''
+        SELECT ?publication ?title WHERE {{
+            ?author <{self.base_uri}givenName> "{given_name}" ;
+                    <{self.base_uri}type> <{self.base_uri}Author> .
+            ?publication <{self.base_uri}author> ?author ;
+                        <{self.base_uri}headline> ?title .
+        }}
+        '''
+        sparql = SPARQLWrapper(self.endpointUrl)
+        sparql.setQuery(sparql_query)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        return results['results']['bindings']
+
+
+
+# In[387]:
 
 
 # To use this script:
@@ -522,15 +619,10 @@ csv_path = "/Users/juanpablocasadobissone/Downloads/graph_publications_cleaned.c
 processor.uploadData(csv_path)
 
 
-# In[205]:
+# In[383]:
 
 
-processor = TriplestoreDataProcessor()
-processor.setEndpointUrl("http://localhost:9999/blazegraph/sparql")
 
-# Test getPublicationsByAuthorOrcid
-result = processor.getPublicationsByAuthorOrcid("0000-0002-3938-2064")
-print("Publications by Author ORCID: ", result)
 
 
 # In[ ]:
