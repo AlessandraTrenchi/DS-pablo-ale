@@ -1,5 +1,6 @@
 CREATE DATABASE pabloale;
 USE pabloale;
+
 -- Higher level casses representing the entity-relationship model of the data
 
 /* Entities from CSV data */
@@ -81,3 +82,56 @@ CREATE TABLE ProceedingsPaper (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id)
 );
+
+-- from JSON
+
+CREATE TABLE Authors (
+    id SERIAL PRIMARY KEY,
+    family VARCHAR(100) NOT NULL,
+    given VARCHAR(100) NOT NULL,
+    orcid VARCHAR(50) NOT NULL,
+    publication_id VARCHAR(255) NOT NULL,
+    FOREIGN KEY (publication_id) REFERENCES Publication(id)
+);
+
+CREATE TABLE Publications (
+    id VARCHAR(255) PRIMARY KEY,
+    doi VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE References (
+    id SERIAL PRIMARY KEY,
+    source_doi VARCHAR(255) NOT NULL,
+    target_doi VARCHAR(255) NOT NULL,
+    FOREIGN KEY (source_doi) REFERENCES Publications(doi),
+    FOREIGN KEY (target_doi) REFERENCES Publications(doi)
+);
+
+CREATE TABLE Publishers (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- Table to establish the relationship between Authors and Publications
+CREATE TABLE AuthorPublication (
+    id SERIAL PRIMARY KEY,
+    author_id INT REFERENCES Authors(id),
+    publication_id INT REFERENCES Publications(id)
+);
+
+-- Populate Publishers
+INSERT INTO Publishers (id, name)
+VALUES
+    ('crossref:6228', 'Codon Publications'),
+    ('crossref:4297', 'Riga Technical University'),
+    ('crossref:297', 'Springer Science and Business Media LLC'),
+    -- ... (other publishers)
+
+-- Populate Publications and Authors (adjust as needed)
+-- ...
+
+-- Populate References (adjust as needed)
+-- ...
+
+-- Populate Venue IDs (adjust as needed)
+-- ...

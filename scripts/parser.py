@@ -1,7 +1,5 @@
-# script to load and parse RDF data using the rdflib library.
-# Import the rdflib library
 import sqlparse
-
+#  parse and process the SQL statements 
 def parse_sql_file(file_path):
     with open(file_path, 'r') as sql_file:
         sql_content = sql_file.read()
@@ -21,5 +19,3 @@ def parse_sql_file(file_path):
 if __name__ == "__main__":
     sql_file_path = "database.sql"
     parse_sql_file(sql_file_path)
-
-#if you run python parser.py in the command line, it will parse the RDF data in data.rdf and print the triples
