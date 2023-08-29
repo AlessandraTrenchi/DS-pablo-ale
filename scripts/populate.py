@@ -1,11 +1,10 @@
-import sqlite3 # for working with the sqlite database
+import sqlite3
 import csv
 import json
 
-
 def insert_publisher(cursor, id, name): 
-    query = "INSERT INTO Publishers (id, name) VALUES (?, ?)" #query to insert data into the Publishers table
-    cursor.execute(query, (id, name)) #execute the query with the provided data
+    query = "INSERT INTO Publishers (id, name) VALUES (?, ?)"
+    cursor.execute(query, (id, name))
 
 def insert_publication(cursor, id, doi):
     query = "INSERT INTO Publications (id, doi) VALUES (?, ?)"
@@ -15,32 +14,49 @@ def insert_reference(cursor, source_doi, target_doi):
     query = "INSERT INTO References (source_doi, target_doi) VALUES (?, ?)"
     cursor.execute(query, (source_doi, target_doi))
 
-# Open the database connection
-conn = sqlite3.connect('ds-pablo-ale.db')
-cursor = conn.cursor() #creating a cursor object
+def insert_data_from_csv(cursor, csv_filename):
+    with open(csv_filename, 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)  # Skip header row
 
-# Populate Publishers from CSV
-with open('publishers.csv', 'r') as csv_file: # publishers.csv', creates a CSV reader, and iterates over each row in the CSV file
-    csv_reader = csv.reader(csv_file) #  skips the header row using next(csv_reader)
-    next(csv_reader)  # Skip header row
+        for row in csv_reader:
+            try:
+                insert_publisher(cursor, *row) # Insert data into Publishers table
+            except sqlite3.Error as e:
+                print(f"Error inserting data from CSV: {e}")
 
-    for row in csv_reader:
-        insert_publisher(cursor, *row)
+def insert_data_from_json(cursor, json_filename, insert_function):
+    with open(json_filename, 'r') as json_file:
+        data = json.load(json_file)
+        for item in data:
+            try:
+                insert_function(cursor, item['id'], item['doi'])
+            except sqlite3.Error as e:
+                print(f"Error inserting data from JSON: {e}")
 
-# Populate Publications from JSON
-with open('publications.json', 'r') as json_file:
-    publications_data = json.load(json_file)
+try:
+    # Open the database connection
+    conn = sqlite3.connect('ds-pablo-ale.db')
+    cursor = conn.cursor()
 
-    for publication in publications_data:
-        insert_publication(cursor, publication['id'], publication['doi'])
+    # Enable foreign key constraints
+    cursor.execute("PRAGMA foreign_keys = ON")
 
-# Populate References from JSON
-with open('references.json', 'r') as json_file:
-    references_data = json.load(json_file)
+    # Populate Publishers from CSV
+    insert_data_from_csv(cursor, 'publishers.csv')
 
-    for reference in references_data:
-        insert_reference(cursor, reference['source_doi'], reference['target_doi'])
+    # Populate Publications from JSON
+    insert_data_from_json(cursor, 'publications.json', insert_publication)
 
-# Commit the changes and close the connection
-conn.commit()
-conn.close()
+    # Populate References from JSON
+    insert_data_from_json(cursor, 'references.json', insert_reference)
+
+    # Commit the changes
+    conn.commit()
+
+except sqlite3.Error as e:
+    print(f"SQLite error: {e}")
+    conn.rollback()  # Rollback changes in case of error
+
+finally:
+    conn.close()
