@@ -34,6 +34,17 @@ def insert_data_from_json(cursor, relational_other_data, insert_function):
             except sqlite3.Error as e:
                 print(f"Error inserting data from JSON: {e}")
 
+
+# Function to insert data into the Event table
+def insert_event(cursor, event_detail):
+    query = "INSERT INTO Event (event_detail) VALUES (?)"
+    cursor.execute(query, (event_detail,))
+
+# Function to insert data into the IdentifiableEntity table
+def insert_identifiable_entity(cursor, id):
+    query = "INSERT INTO IdentifiableEntity (id) VALUES (?)"
+    cursor.execute(query, (id,))
+
 try:
     # Open the database connection
     conn = sqlite3.connect('ds-pablo-ale.db')
@@ -43,13 +54,10 @@ try:
     cursor.execute("PRAGMA foreign_keys = ON")
 
     # Populate Publishers from CSV
-    insert_data_from_csv(cursor, 'publishers.csv')
+    insert_data_from_csv(cursor, 'data/relational_publications.csv')
 
     # Populate Publications from JSON
-    insert_data_from_json(cursor, 'publications.json', insert_publication)
-
-    # Populate References from JSON
-    insert_data_from_json(cursor, 'references.json', insert_reference)
+    insert_data_from_json(cursor, 'data/relational_other_data.json', insert_publication)
 
     # Commit the changes
     conn.commit()

@@ -119,19 +119,4 @@ CREATE TABLE AuthorPublication (
     publication_id INT REFERENCES Publications(id)
 );
 
--- Populate Publishers
-INSERT INTO Publishers (id, name)
-VALUES
-    ('crossref:6228', 'Codon Publications'),
-    ('crossref:4297', 'Riga Technical University'),
-    ('crossref:297', 'Springer Science and Business Media LLC'),
-    -- ... (other publishers)
-
--- Populate Publications and Authors (adjust as needed)
--- ...
-
--- Populate References (adjust as needed)
--- ...
-
--- Populate Venue IDs (adjust as needed)
--- ...
+-- Populating the tables in populate.py
