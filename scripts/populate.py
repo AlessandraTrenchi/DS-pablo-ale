@@ -14,8 +14,8 @@ def insert_reference(cursor, source_doi, target_doi):
     query = "INSERT INTO References (source_doi, target_doi) VALUES (?, ?)"
     cursor.execute(query, (source_doi, target_doi))
 
-def insert_data_from_csv(cursor, csv_filename):
-    with open(csv_filename, 'r') as csv_file:
+def insert_data_from_csv(cursor, relational_publications):
+    with open(relational_publications, 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)  # Skip header row
 
@@ -25,8 +25,8 @@ def insert_data_from_csv(cursor, csv_filename):
             except sqlite3.Error as e:
                 print(f"Error inserting data from CSV: {e}")
 
-def insert_data_from_json(cursor, json_filename, insert_function):
-    with open(json_filename, 'r') as json_file:
+def insert_data_from_json(cursor, relational_other_data, insert_function):
+    with open(relational_other_data, 'r') as json_file:
         data = json.load(json_file)
         for item in data:
             try:
