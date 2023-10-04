@@ -1,7 +1,7 @@
 CREATE DATABASE pabloale;
 USE pabloale;
 
--- Higher level casses representing the entity-relationship model of the data
+-- Higher level classes representing the entity-relationship model of the data
 
 /* Entities from CSV data */
 CREATE TABLE Publisher (
@@ -31,31 +31,31 @@ CREATE TABLE Publication (
 );
 
 /* Entities from JSON structure and reference UML */
-CREATE TABLE IdentifiableEntity (
+CREATE TABLE Identifiable_Entity (
     id VARCHAR(50) PRIMARY KEY
 );
 
 CREATE TABLE Person (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    identifiableEntityId VARCHAR(50) REFERENCES IdentifiableEntity(id),
+    identifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
     givenName VARCHAR(50) NOT NULL,
     familyName VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    IdentifiableEntityId VARCHAR(50) REFERENCES IdentifiableEntity(id),
+    IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
     title VARCHAR(255),
     type VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Organization (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    IdentifiableEntityId VARCHAR(50) REFERENCES IdentifiableEntity(id),
+    IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
     name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE PublicationVenue (
+CREATE TABLE Publication_Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id),
     VenueId INT REFERENCES Venue(id)
@@ -67,18 +67,18 @@ CREATE TABLE Citation (
     CitedPublicationId VARCHAR(255) REFERENCES Publication(id)
 );
 
-CREATE TABLE BookChapter (
+CREATE TABLE Book_Chapter (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id),
     chapterNumber INT NOT NULL
 );
 
-CREATE TABLE JournalArticle (
+CREATE TABLE Journal_Article (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id)
 );
 
-CREATE TABLE ProceedingsPaper (
+CREATE TABLE Proceedings_Paper (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id)
 );
@@ -113,7 +113,7 @@ CREATE TABLE Publishers (
 );
 
 -- Table to establish the relationship between Authors and Publications
-CREATE TABLE AuthorPublication (
+CREATE TABLE Author_Publication (
     id SERIAL PRIMARY KEY,
     author_id INT REFERENCES Authors(id),
     publication_id INT REFERENCES Publications(id)
