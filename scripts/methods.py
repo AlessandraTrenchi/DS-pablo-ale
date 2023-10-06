@@ -16,7 +16,7 @@ class Venue:
         return self.title
     
     def addPublisher(self, publisher):
-        self.publisher.add(publisher)
+        self.publisher.add(publisher) #add publishers to the list
 
     def getPublisher(self)-> 'Organization':
         return self.publisher
@@ -144,19 +144,13 @@ class JournalArticle:
             return None
         
 class ProceedingsPaper:
-    def __init__(self, id, publication_id):
-        self.id = id
-        self.publication_id = publication_id
+    pass
 
 class Journal:
-    def __init__ (self, id, venue_id):
-        self.id = id
-        self.venue_id = venue_id
+   pass
 
 class Book:
-    def __init__ (self, id, venue_id):
-        self.id = id
-        self.venue_id = venue_id
+   pass
 
 class Proceedings:
     def __init__ (self, id, venue_id, event):
