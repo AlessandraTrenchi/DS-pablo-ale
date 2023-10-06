@@ -11,23 +11,20 @@ class Venue:
         self.title = title
         self.type = type
         self.publisher = None #initialize publisher as None
+
     def getTitle(self) -> str:
         return self.title
     
+    def addPublisher(self, publisher):
+        self.publisher.add(publisher)
+
     def getPublisher(self)-> 'Organization':
         return self.publisher
     #Retrieve the organization (publisher) associated with this venue.
 
     #Returns: Organization: The Organization object representing the publisher.
-class Publisher:
-    def __init__(self, id, name): #init is a constructor that initializes the attributes when an instance of the class is created
-        self.id = id #init has 2 attributes: id and name
-        self.name = name
-# each class has attributes corresponding to the columns in the table, basic structure
-class Event:
-    def __init__(self, id, event_detail):
-        self.id = id
-        self.event_detail = event_detail
+
+
 
 class Publication:
     def __init__(self, id, title, type, publication_year, issue, volume,
@@ -60,7 +57,7 @@ class Publication:
         return self.cited_publications  
     def addCitedPublication(self, publication):
         self.cited_publications.append(publication)
-        
+
     def getPublicationVenue(self) -> Venue: #retrieve information about a publication
         """
         Retrieve the publication venue associated with this publication.
@@ -101,10 +98,10 @@ class Person:
         self.given_name = given_name
         self.family_name = family_name
     
-    def getGivenName (self):
+    def getGivenName (self) -> str:
         return self.given_name
     
-    def getFamilyName(self):
+    def getFamilyName(self) -> str:
         return self.family_name
 
 class Organization:
@@ -113,20 +110,9 @@ class Organization:
         self.identifiable_entity_id = identifiable_entity_id
         self.name = name
 
-    def getName(self):
+    def getName(self) -> str:
         return self.name
-    
-class PublicationVenue:
-    def __init__(self, id, publication_id, venue_id):
-        self.id = id
-        self.publication_id = publication_id
-        self.venue_id = venue_id
 
-class Citation:
-    def __init__(self, id, citing_publication_id, cited_publication_id):
-        self.id = id
-        self.citing_publication_id = citing_publication_id
-        self.cited_publication_id = cited_publication_id
 
 class BookChapter:
     def __init__(self, id, publication_id, chapter_number):
