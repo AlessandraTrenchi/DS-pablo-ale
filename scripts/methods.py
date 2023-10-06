@@ -10,7 +10,7 @@ class Venue:
         self.identifiable_entity_id = identifiable_entity_id
         self.title = title
         self.type = type
-        self.publisher = None #initialize publisher as None
+        self.publisher = [] 
 
     def getTitle(self) -> str:
         return self.title
@@ -42,7 +42,8 @@ class Publication:
         self.event_id = event_id
         self.cited_publications = [] #initialize an empty string for cited publications
         self.authors = set() #initialize an empty set for authors
-
+        self.publication_venue = None 
+        
     def getPublicationYear(self) -> int or None:
         if isinstance(self.publication_year, int):
             return self.publication_year
@@ -58,7 +59,7 @@ class Publication:
     def addCitedPublication(self, publication):
         self.cited_publications.append(publication)
 
-    def getPublicationVenue(self) -> Venue: #retrieve information about a publication
+    def getPublicationVenue(self) -> Venue or None: #retrieve information about a publication, return None if the Venue is not set
         """
         Retrieve the publication venue associated with this publication.
 
@@ -148,17 +149,17 @@ class ProceedingsPaper:
         self.publication_id = publication_id
 
 class Journal:
-    def _init_ (self, id, venue_id):
+    def __init__ (self, id, venue_id):
         self.id = id
         self.venue_id = venue_id
 
 class Book:
-    def _init_ (self, id, venue_id):
+    def __init__ (self, id, venue_id):
         self.id = id
         self.venue_id = venue_id
 
 class Proceedings:
-    def _init_ (self, id, venue_id, event):
+    def __init__ (self, id, venue_id, event):
         self.id = id
         self.venue_id = venue_id
         self.event = event
