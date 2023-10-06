@@ -55,17 +55,17 @@ CREATE TABLE Organization (
     name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE Publication_Venue (
+/**CREATE TABLE Publication_Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id),
     VenueId INT REFERENCES Venue(id)
-);
+);**/
 
-CREATE TABLE Citation (
+/**CREATE TABLE Citation (
     id INT PRIMARY KEY AUTO_INCREMENT,
     CitingPublicationId VARCHAR(255) REFERENCES Publication(id),
     CitedPublicationId VARCHAR(255) REFERENCES Publication(id)
-);
+);**/
 
 CREATE TABLE Book_Chapter (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -113,10 +113,10 @@ CREATE TABLE Publishers (
 );
 
 -- Table to establish the relationship between Authors and Publications
-CREATE TABLE Author_Publication (
+/* CREATE TABLE Author_Publication (
     id SERIAL PRIMARY KEY,
     author_id INT REFERENCES Authors(id),
     publication_id INT REFERENCES Publications(id)
-);
+); 
 
 -- Populating the tables in populate.py

@@ -25,7 +25,6 @@ class Venue:
     #Returns: Organization: The Organization object representing the publisher.
 
 
-
 class Publication:
     def __init__(self, id, title, type, publication_year, issue, volume,
                  chapter, publication_venue, venue_type, publisher_id, event_id):
