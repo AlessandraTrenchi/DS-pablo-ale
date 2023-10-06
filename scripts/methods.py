@@ -58,8 +58,10 @@ class Publication:
     def getCitedPublications(self) -> list['Publication']:
         # return the list of cited publications for this publication
         return self.cited_publications  
-
-    def getPublicationVenue(self) -> Venue:
+    def addCitedPublication(self, publication):
+        self.cited_publications.append(publication)
+        
+    def getPublicationVenue(self) -> Venue: #retrieve information about a publication
         """
         Retrieve the publication venue associated with this publication.
 
@@ -67,11 +69,24 @@ class Publication:
             Venue: The Venue object representing the publication venue.
         """
         return self.publication_venue
+    
+    def addPublicationVenue(self, venue): #associate or link one publication to another
+        """
+        Associate a publication with a publication venue.
+
+        Args:
+            venue (Venue): The Venue object representing the publication venue.
+        """
+        self.publication_venue = venue
 
     def getAuthors(self) -> set['Person']:
         #return the set of authors associated with this publication
         return self.authors  
+    
+    def addAuthor(self, author):
+        self.authors.add(author)
 
+    
 class IdentifiableEntity:
     def __init__(self, id):
         self.id = id
