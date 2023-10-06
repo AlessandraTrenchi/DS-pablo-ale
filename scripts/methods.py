@@ -10,6 +10,15 @@ class Venue:
         self.identifiable_entity_id = identifiable_entity_id
         self.title = title
         self.type = type
+        self.publisher = None #initialize publisher as None
+    def getTitle(self) -> str:
+        return self.title
+    
+    def getPublisher(self)-> 'Organization':
+        return self.publisher
+    #Retrieve the organization (publisher) associated with this venue.
+
+    #Returns: Organization: The Organization object representing the publisher.
 class Publisher:
     def __init__(self, id, name): #init is a constructor that initializes the attributes when an instance of the class is created
         self.id = id #init has 2 attributes: id and name
@@ -67,6 +76,9 @@ class IdentifiableEntity:
     def __init__(self, id):
         self.id = id
 
+    def getIds(self) -> list [str]: #Returns a list containing the ID of this entity
+        return [self.id] #Retrieve a list containing the ID of this identifiable entity.
+
 class Person:
     def __init__(self, id, identifiable_entity_id, given_name, family_name):
         self.id = id
@@ -86,6 +98,9 @@ class Organization:
         self.identifiable_entity_id = identifiable_entity_id
         self.name = name
 
+    def getName(self):
+        return self.name
+    
 class PublicationVenue:
     def __init__(self, id, publication_id, venue_id):
         self.id = id
@@ -103,13 +118,49 @@ class BookChapter:
         self.id = id
         self.publication_id = publication_id
         self.chapter_number = chapter_number
+    
+    def getChapterNumber(self) -> int:
+        return self.chapter_number
 
 class JournalArticle:
-    def __init__(self, id, publication_id):
+    def __init__(self, id, publication_Id, issue, volume):
         self.id = id
-        self.publication_id = publication_id
-
+        self.publication_Id = publication_Id
+        self.issue = issue
+        self.volume = volume
+    
+    def getIssue(self) -> str or None:
+        if isinstance(self.issue, str):
+            return self.issue
+        else:
+            return None
+        
+    def getVolume(self) -> str or None:
+        if isinstance(self.volume, str):
+            return self.volume
+        else:
+            return None
+        
 class ProceedingsPaper:
     def __init__(self, id, publication_id):
         self.id = id
         self.publication_id = publication_id
+
+class Journal:
+    def _init_ (self, id, venue_id):
+        self.id = id
+        self.venue_id = venue_id
+
+class Book:
+    def _init_ (self, id, venue_id):
+        self.id = id
+        self.venue_id = venue_id
+
+class Proceedings:
+    def _init_ (self, id, venue_id, event):
+        self.id = id
+        self.venue_id = venue_id
+        self.event = event
+    
+    def getEvent(self) -> str:
+        return self.event
