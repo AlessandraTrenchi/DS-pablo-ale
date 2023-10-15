@@ -6,12 +6,14 @@ USE pabloale;
 /* Entities from CSV data */
 CREATE TABLE Publisher (
     id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(50)
+    name VARCHAR(50),
+    UNIQUE (id)
 );
 
 CREATE TABLE Event (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    event_detail VARCHAR(50)
+    event_detail VARCHAR(50),
+    UNIQUE (id)
 );
 
 CREATE TABLE Publication (
@@ -26,18 +28,21 @@ CREATE TABLE Publication (
     venue_type VARCHAR(50) NOT NULL,
     publisher_id VARCHAR(255),
     event_id INT,
+    UNIQUE (id),
     FOREIGN KEY (publisher_id) REFERENCES Publisher(id),
     FOREIGN KEY (event_id) REFERENCES Event(id)
 );
 
 /* Entities from JSON structure and reference UML */
 CREATE TABLE Identifiable_Entity (
-    id VARCHAR(50) PRIMARY KEY
+    id VARCHAR(50) PRIMARY KEY,
+    UNIQUE (id)
 );
 
 CREATE TABLE Person (
     id INT PRIMARY KEY AUTO_INCREMENT,
     identifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
+    UNIQUE (id),
     givenName VARCHAR(50) NOT NULL,
     familyName VARCHAR(50) NOT NULL
 );
@@ -46,12 +51,14 @@ CREATE TABLE Venue (
     id INT PRIMARY KEY AUTO_INCREMENT,
     IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
     title VARCHAR(255),
+    UNIQUE (id),
     type VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Organization (
     id INT PRIMARY KEY AUTO_INCREMENT,
     IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
+    UNIQUE (id),
     name VARCHAR(255) NOT NULL
 );
 
@@ -70,16 +77,19 @@ CREATE TABLE Organization (
 CREATE TABLE Book_Chapter (
     id INT PRIMARY KEY AUTO_INCREMENT,
     PublicationId VARCHAR(255) REFERENCES Publication(id),
+    UNIQUE (id),
     chapterNumber INT NOT NULL
 );
 
 CREATE TABLE Journal_Article (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    UNIQUE (id),
     PublicationId VARCHAR(255) REFERENCES Publication(id)
 );
 
 CREATE TABLE Proceedings_Paper (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    UNIQUE (id),
     PublicationId VARCHAR(255) REFERENCES Publication(id)
 );
 
@@ -91,24 +101,28 @@ CREATE TABLE Authors (
     given VARCHAR(100) NOT NULL,
     orcid VARCHAR(50) NOT NULL,
     publication_id VARCHAR(255) NOT NULL,
+    UNIQUE (id),
     FOREIGN KEY (publication_id) REFERENCES Publication(id)
 );
 
 CREATE TABLE Publications (
     id VARCHAR(255) PRIMARY KEY,
-    doi VARCHAR(50) NOT NULL
+    doi VARCHAR(50) NOT NULL,
+    UNIQUE (id, doi)
 );
 
 CREATE TABLE References (
     id SERIAL PRIMARY KEY,
     source_doi VARCHAR(255) NOT NULL,
     target_doi VARCHAR(255) NOT NULL,
+    UNIQUE (id, doi)
     FOREIGN KEY (source_doi) REFERENCES Publications(doi),
     FOREIGN KEY (target_doi) REFERENCES Publications(doi)
 );
 
 CREATE TABLE Publishers (
     id VARCHAR(255) PRIMARY KEY,
+    UNIQUE (id)
     name VARCHAR(255) NOT NULL
 );
 
