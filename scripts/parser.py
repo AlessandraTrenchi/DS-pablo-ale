@@ -1,41 +1,42 @@
 import pandas as pd
-import pymysql 
+import json
 
-# Read the CSV file into a pandas DataFrame
-df = pd.read_csv('relational_publications.csv')
+csv_file = 'relational_publications.csv'
+json_file = 'relational_other_data.json'
 
-# Establish a database connection
-connection = pymysql.connect(host='your_host', user='your_user', password='your_password', database='pabloale')
-cursor = connection.cursor()
+# Function to parse CSV data
+def parse_csv(csv_file):
+    df = pd.read_csv(csv_file)
+    print("Processing CSV Data:")
+    for index, row in df.iterrows():
+        print(f'CSV Row {index + 1}:')
+        for column, value in row.items():
+            print(f'{column}: {value}')
 
-# Iterate through each row in the DataFrame and insert data
-for index, row in df.iterrows():
-    id = row['id']
-    title = row['title']
-    type = row['type']
-    publication_year = row['publication_year']
-    issue = row['issue']
-    volume = row['volume']
-    chapter = row['chapter']
-    publication_venue = row['publication_venue']
-    venue_type = row['venue_type']
-    publisher = row['publisher']
-    event = row['event']
+# Function to parse JSON data
+def parse_json(json_file):
+    with open(json_file, 'r') as json_data:
+        data = json.load(json_data)
+    print("Processing JSON Data:")
+    if isinstance(data, list):
+        for item in data:
+            print('JSON Item:')
+            for key, value in item.items():
+                print(f'{key}: {value}')
+    else:
+        print("JSON data format not supported.")
 
-    # Insert data into the respective tables based on your schema
-    # Use SQL INSERT statements or ORM methods to perform the insertion
-    # For example:
-    # Insert into Publisher table
-    cursor.execute("INSERT INTO Publisher (id, name) VALUES (%s, %s)", (id, publisher))
+# Example usage of the functions
+if __name__ == "__main__": #the code within this block is executed when the script is run as the main program.
+    csv_file = 'relational_publications.csv'
+    json_file = 'relational_other_data.json'
 
-    # Insert into Publication table
-    cursor.execute("INSERT INTO Publication (id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, publisher_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, id))
-    
-    # Insert into Event table
-    cursor.execute("INSERT INTO Event (event_detail) VALUES (%s)", (event,))
+    # Parse CSV data
+    parse_csv(csv_file)
 
-# Commit the changes to the database if you're using a transaction
-connection.commit()
+    # Parse JSON data
+    parse_json(json_file)
 
-# Close the database connection
-connection.close()
+
+
+

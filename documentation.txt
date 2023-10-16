@@ -102,5 +102,26 @@ Since Journal, Book and Proceeding are entities only representing relationships 
 It is important to parse data from JSON and CSV files before populating the database.
 Parsing is the process of extracting structured data from the raw data files.
 
+The pandas library reads the CSV file and loads it into the DataFrame in order to work with data in a structured way. 
+Pandas library understands the structure of the file and separates the values into individual columns based on the delimiter (a comma). Each row of the CSV file becomes a row in the DataFrame, and each attribute (column) is represented as a column in the DataFrame.
+parse_csv takes a CSV file path as an argument. Inside the function:
+- We use pandas to read the CSV file into a DataFrame.
+- We print a message to indicate that we're processing CSV data.
+- We iterate through each row in the DataFrame and, for each row, iterate through its columns to print the column names and values.
+
+function parse_json that takes a JSON file path as an argument. Inside the function:
+
+- We open and read the JSON file using the json library.
+- We print a message to indicate that we're processing JSON data.
+- We check if the JSON data is a list (signifying multiple objects) or a single object:
+If it's a list, we iterate through each object and print the key-value pairs.
+If it's not a list, we print a message indicating that the JSON data format is not supported.
+
+
+POPULATING THE DATABASE
+Inside the loop use SQL INSERT statements to insert the extracted values into the respective tables.
+After inserting the data for each row, commit the changes to the database and close the database connection.
+
+
 
 # Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
