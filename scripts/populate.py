@@ -8,7 +8,7 @@ def insert_publishers(cursor, publisher_id, name):
 
 # Function to insert data into the Event table
 def insert_event(cursor, id, event_detail):
-    query = "INSERT INTO Event (event_detail) VALUES (?)"
+    query = "INSERT INTO Event (event_detail) VALUES (?, ?)"
     cursor.execute(query, (id, event_detail))
 
 def insert_publication(cursor, id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, publisher_id, event_id):
@@ -17,17 +17,27 @@ def insert_publication(cursor, id, title, type, publication_year, issue, volume,
 
 # Function to insert data into the IdentifiableEntity table
 def insert_identifiable_entity(cursor, id):
-    query = "INSERT INTO IdentifiableEntity (id) VALUES (?)"
+    query = "INSERT INTO Identifiable_Entity (id) VALUES (?)"
     cursor.execute(query, (id,))
+
+def insert_data_into_identifiable_entity_table(cursor, json_data):
+    for item in json_data:
+        try:
+            insert_identifiable_entity(cursor, item['id'])
+        except sqlite3.Error as e:
+            print(f"Error inserting data into Identifiable_Entity table: {e}")
 
 def insert_person(cursor, identifiable_entity_id, given_name, family_name):
     query = "INSERT INTO Person (identifiableEntityId, givenName, familyName) VALUES (?, ?, ?)"
     cursor.execute(query, (identifiable_entity_id, given_name, family_name))
 
-def insert_venues(cursor, doi, venues):
-    query = "INSERT INTO Venue (publication_id, venue_id) VALUES (?, ?)"
+def insert_venues(cursor, doi, venues, IdentifiableEntityId):
+    query = "INSERT INTO Venue (id, IdentifiableEntityId, title) VALUES (?, ?, ?)"
     for venue_id in venues:
-        cursor.execute(query, (doi, venue_id))
+        your_id_value = venue_id  # Use venue_id as the id
+        your_IdentifiableEntityId_value = Identifiable_Entity_Identity_id  # Use the provided IdentifiableEntityId
+        title = venues[venue_id]  # Extract the title from the JSON data
+        cursor.execute(query, (your_id_value, your_IdentifiableEntityId_value, title))
 
 def insert_organization(cursor, identifiable_entity_id, name):
     query = "INSERT INTO Organization (IdentifiableEntityId, name) VALUES (?, ?)"
