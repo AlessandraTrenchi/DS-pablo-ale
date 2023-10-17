@@ -31,13 +31,14 @@ def insert_person(cursor, identifiable_entity_id, given_name, family_name):
     query = "INSERT INTO Person (identifiableEntityId, givenName, familyName) VALUES (?, ?, ?)"
     cursor.execute(query, (identifiable_entity_id, given_name, family_name))
 
-def insert_venues(cursor, doi, venues, IdentifiableEntityId):
+def insert_venues(cursor, doi, venues):
     query = "INSERT INTO Venue (id, IdentifiableEntityId, title) VALUES (?, ?, ?)"
     for venue_id in venues:
         your_id_value = venue_id  # Use venue_id as the id
-        your_IdentifiableEntityId_value = Identifiable_Entity_Identity_id  # Use the provided IdentifiableEntityId
+        your_IdentifiableEntityId_value = doi  # Use the DOI as the IdentifiableEntityId
         title = venues[venue_id]  # Extract the title from the JSON data
         cursor.execute(query, (your_id_value, your_IdentifiableEntityId_value, title))
+
 
 def insert_organization(cursor, identifiable_entity_id, name):
     query = "INSERT INTO Organization (IdentifiableEntityId, name) VALUES (?, ?)"
