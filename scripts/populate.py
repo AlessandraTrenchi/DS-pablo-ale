@@ -1,10 +1,10 @@
-import sqlite3
+import sqlite3 #for sqlite database operations
 import csv
 import json
 
-def insert_publisher(cursor, id, name): 
+def insert_publishers(cursor, publisher_id, name): 
     query = "INSERT INTO Publishers (id, name) VALUES (?, ?)"
-    cursor.execute(query, (id, name))
+    cursor.execute(query, (publisher_id, name))
 
 # Function to insert data into the Event table
 def insert_event(cursor, id, event_detail):
@@ -24,9 +24,10 @@ def insert_person(cursor, identifiable_entity_id, given_name, family_name):
     query = "INSERT INTO Person (identifiableEntityId, givenName, familyName) VALUES (?, ?, ?)"
     cursor.execute(query, (identifiable_entity_id, given_name, family_name))
 
-def insert_venue(cursor, identifiable_entity_id, title, venue_type):
-    query = "INSERT INTO Venue (IdentifiableEntityId, title, type) VALUES (?, ?, ?)"
-    cursor.execute(query, (identifiable_entity_id, title, venue_type))
+def insert_venues(cursor, doi, venues):
+    query = "INSERT INTO Venue (publication_id, venue_id) VALUES (?, ?)"
+    for venue_id in venues:
+        cursor.execute(query, (doi, venue_id))
 
 def insert_organization(cursor, identifiable_entity_id, name):
     query = "INSERT INTO Organization (IdentifiableEntityId, name) VALUES (?, ?)"
@@ -62,14 +63,15 @@ def insert_publication(cursor, id, doi):
     query = "INSERT INTO Publications (id, doi) VALUES (?, ?)"
     cursor.execute(query, (id, doi))
 
-def insert_reference(cursor, source_doi, target_doi):
+def insert_references(cursor, doi, references):
     query = "INSERT INTO References (source_doi, target_doi) VALUES (?, ?)"
-    cursor.execute(query, (source_doi, target_doi))
+    for reference in references:
+        cursor.execute(query, (doi, reference))
 
 # Function to insert data into the Publishers table
-def insert_publisher(cursor, id, name): 
-    query = "INSERT INTO Publishers (id, name) VALUES (?, ?)"
-    cursor.execute(query, (id, name))
+def insert_publisher(cursor, id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, publisher, event): 
+    query = "INSERT INTO Publishers (id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, publisher, event) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    cursor.execute(query, (id, title, type, publication_year, issue, volume, chapter, publication_venue, venue_type, publisher, event))
 
 # Function to insert data into the AuthorPublication table
 def insert_author_publication(cursor, author_id, publication_id):
@@ -87,15 +89,34 @@ def insert_data_from_csv(cursor, relational_publications):
             except sqlite3.Error as e:
                 print(f"Error inserting data from CSV: {e}")
 
-def insert_data_from_json(cursor, relational_other_data, insert_function):
+
+# Function to insert data into all relevant tables
+def insert_data_from_json(cursor, relational_other_data):
     with open(relational_other_data, 'r') as json_file:
         data = json.load(json_file)
-        for item in data:
+        for doi, values in data.items():
             try:
-                insert_function(cursor, item['id'], item['doi'])
+                # Insert data into Authors table
+                if "authors" in values:
+                    authors = values["authors"]
+                    for author in authors:
+                        insert_author(cursor, doi, author["family"], author["given"], author["orcid"])
+                 # Insert data into Venues table
+                if "venues_id" in values:
+                    venues = values["venues_id"]
+                    insert_venues(cursor, doi, venues)
+
+                # Insert data into References table
+                if "references" in values:
+                    references = values["references"]
+                    insert_references(cursor, doi, references)
+
+                # Insert data into Publishers table
+                if "publishers" in values:
+                    publisher = values["publishers"]
+                    insert_publishers(cursor, publisher["id"], publisher["name"])
             except sqlite3.Error as e:
                 print(f"Error inserting data from JSON: {e}")
-
 
 try:
     # Open the database connection
