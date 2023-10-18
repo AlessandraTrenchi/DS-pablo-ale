@@ -122,12 +122,21 @@ If it's not a list, we print a message indicating that the JSON data format is n
 POPULATING THE DATABASE
 #populate.py
 
-After having imported the necessary libraries, the code defines several functions to insert the data into specific tables inside the database.
+After having imported the necessary libraries, the code defines several functions to insert the data into the tables inside the database.
+
+insert_data is a generic function for inserting data into SQL tables, it takes as input cursor - the SQLite cursor object ti execute SQL queries-, table_name, data -dictionary containing column names, values. This function dynamicallt constructs INSERT statements based on the table names and data.
+
+insert_data_from_csv is a function for inserting data from a CSV file into an SQLite table; this function opens the CSV file, reads its contents using a csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
+
+Similarly insert_data_from_json is a function for inserting data from a JSON source into an SQLite table. It takes 3 arguments: cursor, table_name and json_data - a list of dictionaries containing the data. The function iterates through the JSON data and for each dictionary item in the list calls the insert_data function to populate it.
+
+
 All functions take a cursor object (used for SQL commands) and the specified data as parameters. They build a SQL INSERT query to insert data into a specific table with the provided values.
 
 The insert_data_from_csv function inserts the data from a CSV file into the database by taking the cursor and CSV path files as arguments. First it opens the CSV file with csv.reader, then skips the header row because it contains the column names. The function iterates through the rows in the CSV file, calls the insert_publisher function to insert data in the appropriate table. If there is an error during insertion it gives an error message. The insert_data_from_json function works similarly.
 
-
+In the previous approach I developed individual functions for each table in my database, such as insert_publishers, insert_event ... each was responsible for inserting data into its respective table. It was labor intensive and it required code duplication.
+In the updated approach there is a more efficient way of inserting data into tables because there is a Single generic insert function called insert_data which can insert data into any table of my database.
 
 Inside the loop use SQL INSERT statements to insert the extracted values into the respective tables.
 After inserting the data for each row, commit the changes to the database and close the database connection.
