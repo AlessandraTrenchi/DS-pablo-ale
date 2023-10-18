@@ -1,62 +1,55 @@
 import sqlite3
+import pandas as pd
 import json
-import csv
+
+from populate import insert_data
 
 # Function to insert data into a table
 def insert_data(cursor, table_name, data):
-    query = f"INSERT INTO {table_name} ({', '.join(data.keys())}) VALUES ({', '.join(['?'] * len(data))})"
-    cursor.execute(query, tuple(data.values()))
-
-# Function to insert data from a CSV file
-def insert_data_from_csv(cursor, table_name, csv_file):
-    with open(csv_file, 'r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            data_to_insert = {key: row[key] for key in row.keys()}
-            try:
-                insert_data(cursor, table_name, data_to_insert)
-            except sqlite3.Error as e:
-                print(f"Error inserting data into {table_name} from CSV: {e}")
+    placeholders = ', '.join(['?'] * len(data))
+    query = f"INSERT INTO {table_name} ({', '.join(data.keys())}) VALUES ({placeholders})"
+    cursor.execute(query, list(data.values()))
 
 def main():
     try:
         # Open the database connection
-        conn = sqlite3.connect('your_database.db')
+        conn = sqlite3.connect('pabloale.db')  # Use the correct database file name
         cursor = conn.cursor()
 
-        # Enable foreign key constraints if needed
+        # Enable foreign key constraints
         cursor.execute("PRAGMA foreign_keys = ON")
 
-        # Load your JSON data
-        with open('your_json_data.json', 'r') as json_file:
-            data = json.load(json_file)
-
-        # Define the tables and corresponding columns for JSON data
-        json_tables = {
-            "Identifiable_Entity": ["id"],
-            "Another_JSON_Table": ["column1", "column2"],
-            # Add more tables and their corresponding columns for JSON as needed
+        # Define the tables and their corresponding data sources
+        table_sources = {
+            "Publisher": "relational_publications.csv",
+            "Event": "relational_publications.csv",
+            "Publication": "relational_publications.csv",
+            "Identifiable_Entity": "relational_other_data.json",
+            "Person": "relational_other_data.json",
+            "Venue": "relational_other_data.json",
+            "Organization": "relational_other_data.json",
+            "Book_Chapter": "relational_other_data.json",
+            "Journal_Article": "relational_other_data.json",
+            "ProceedingsPaper": "relational_other_data.json",
         }
 
-        # Define the tables and corresponding columns for CSV data
-        csv_tables = {
-            "CSV_Table1": "csv_file1.csv",
-            "CSV_Table2": "csv_file2.csv",
-            # Add more tables and their corresponding CSV files as needed
-        }
-
-        # Insert data from JSON
-        for table_name, columns in json_tables.items():
-            for item in data.get(table_name, []):
-                data_to_insert = {column: item.get(column) for column in columns}
-                try:
-                    insert_data(cursor, table_name, data_to_insert)
-                except sqlite3.Error as e:
-                    print(f"Error inserting data into {table_name}: {e}")
-
-        # Insert data from CSV
-        for table_name, csv_file in csv_tables.items():
-            insert_data_from_csv(cursor, table_name, csv_file)
+        # Insert data from various sources
+        for table_name, source_file in table_sources.items():
+            if source_file.endswith(".json"):
+                with open(source_file, 'r') as json_file:
+                    data = json.load(json_file)
+                    for item in data:
+                        insert_data(cursor, table_name, item)
+            elif source_file.endswith(".csv"):
+                df = pd.read_csv(source_file)
+                for index, row in df.iterrows():
+                    data = {
+                        'id': row['id'],
+                        'identifiable_entity_id': row['identifiable_entity_id'],
+                        'title': row['title'],
+                        'type': row['type']
+                    }
+                    insert_data(cursor, table_name, data)
 
         # Commit the changes
         conn.commit()

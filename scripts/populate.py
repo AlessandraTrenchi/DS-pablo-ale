@@ -12,7 +12,7 @@ def insert_data_from_csv(cursor, table_name, csv_file):
     with open(csv_file, 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            data_to insert = {key: row[key] for key in row.keys()}
+            data_to_insert = {key: row[key] for key in row.keys()}
             try:
                 insert_data(cursor, table_name, data_to_insert)
             except sqlite3.Error as e:
