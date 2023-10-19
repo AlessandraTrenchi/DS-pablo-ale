@@ -1,8 +1,8 @@
 import pandas as pd
 import json
 
-csv_file = 'relational_publications.csv'
-json_file = 'relational_other_data.json'
+csv_file = 'data/relational_publications.csv'
+json_file = 'data/relational_other_data.json'
 
 # Function to parse CSV data
 def parse_csv(csv_file):
@@ -28,8 +28,8 @@ def parse_json(json_file):
 
 # Example usage of the functions
 if __name__ == "__main__": #the code within this block is executed when the script is run as the main program.
-    csv_file = 'relational_publications.csv'
-    json_file = 'relational_other_data.json'
+    csv_file = 'data/relational_publications.csv'
+    json_file = 'data/relational_other_data.json'
 
     # Parse CSV data
     parse_csv(csv_file)

@@ -2,6 +2,23 @@ Data Processing and Querying Software Documentation
 
 In this comprehensive guide, we will provide you with a detailed overview of our software solution designed to address the challenges of processing data stored in different formats and simultaneously querying two distinct types of databases: a Graph Database and a Relational Database.
 
+A relational database stores data in structured tables with rows and columns, allowing an easier organization for large volumes of data (data storage). It allows retrieving data using SQL - structured query language by specifying the criteria to select, filter and sort data. Relational databases handle relationships between sets of data by using foreign keys and joins, using indexes to improve query performance.
+
+From DATA -> raw information that needs to be processed. relational_other_data.json, relational_publications.csv
+
+to a RELATIONAL DATA PROCESSOR -> preparing and trasforming data into a suitable format for storage in a relational database. parse.py
+
+RELATIONAL DATABASE -> stores data into tables with rows and columns, each having a specific data type and relationships with other tables. Data storage, integrity and retrieval. populate.py, main.py
+
+RELATIONAL QUERY PROCESSOR -> module of a relational database responsible for processing SQL queries. Functions: query planning, execution, interpretation and optimization to retrieve data efficiently from the relational database.
+
+GENERIC QUERY PROCESSOR -> handles queries for different types of data stores (relational and graph database).
+
+PYTHON OBJECTS -> once the data is retrieved from the database or processed by a query processor it can be mapped to python objects for further application-level processing.
+
+Taking raw data, processing and structuring it in a relational database, querying the data (relational query processor), extending the capabilities with a generic query processor and representing the results as Python objects.
+
+ 
 Project Overview:
 In today's data-driven world, organizations and individuals often find themselves dealing with data in various formats, ranging from structured CSV files to complex JSON documents. Managing and extracting valuable insights from this diverse data can be a complex task. Our software aims to simplify this process by offering a unified platform for data ingestion, processing, and querying, while accommodating both graph and relational databases.
 
@@ -142,8 +159,8 @@ In main.py there is the main logic of the database:
 2. enabling constraints. Foreign key constraints are rules that enforce referential integrity in a relational database. 
 3. define the tables and the data sources as a dictionary
 4. iterate through the tables and data sources calling the functions from populate.py
-5. handle potential errors
-6. commit changes
+5. handle potential errors.
+6. commit changes.
 7. close the database connection.
 
 Type of entities relationships' -> parent table, child table (table that contains the foreign key). 
