@@ -4,11 +4,6 @@ USE pabloale;
 -- Higher level classes representing the entity-relationship model of the data
 
 /* Entities from CSV data */
-CREATE TABLE Publisher (
-    id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(50),
-    UNIQUE (id)
-);
 
 CREATE TABLE Event (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -26,10 +21,10 @@ CREATE TABLE Publication (
     chapter INT,
     publication_venue VARCHAR(255) NOT NULL,
     venue_type VARCHAR(50) NOT NULL,
-    publisher_id VARCHAR(255),
-    event_id INT,
+    publisher VARCHAR(50),
+    event INT,
     UNIQUE (id),
-    FOREIGN KEY (publisher_id) REFERENCES Publisher(id),
+    FOREIGN KEY (publisher) REFERENCES Publisher(id),
     FOREIGN KEY (event_id) REFERENCES Event(id)
 );
 
