@@ -4,6 +4,26 @@ import json
 
 from populate import insert_data
 
+def open_database_connection(database_file):
+    try:
+        # Open the database connection
+        conn = sqlite3.connect(database_file)
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
+        return conn
+    except sqlite3.Error as e:
+        print(f"Error connecting to the database: {e}")
+        return None
+
+def close_database_connection(conn):
+    if conn:
+        try:
+            conn.commit()  # Commit changes (if any)
+        except sqlite3.Error as e:
+            print(f"Error committing changes: {e}")
+        
+        conn.close()  # Close the database connection
+        print("Database connection closed")
+
 # Function to insert data into a table
 def insert_data(cursor, table_name, data):
     placeholders = ', '.join(['?'] * len(data))
@@ -13,15 +33,12 @@ def insert_data(cursor, table_name, data):
 def main():
     try:
         # Open the database connection
-        conn = sqlite3.connect('pabloale.db')  # Use the correct database file name
+        conn = open_database_connection('pabloale.db')  # Use the correct database file name
         cursor = conn.cursor()
-
-        # Enable foreign key constraints
-        cursor.execute("PRAGMA foreign_keys = ON")
 
         # Define the tables and their corresponding data sources
         table_sources = {
-            "Publisher": "relational_publications.csv",
+            "Publishers": "relational_other_data.json",
             "Event": "relational_publications.csv",
             "Publication": "relational_publications.csv",
             "Identifiable_Entity": "relational_other_data.json",
@@ -59,7 +76,7 @@ def main():
         conn.rollback()  # Rollback changes in case of an error
 
     finally:
-        conn.close()
+        close_database_connection(conn)
 
 if __name__ == "__main__":
     main()

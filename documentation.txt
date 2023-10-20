@@ -165,6 +165,6 @@ In main.py there is the main logic of the database:
 
 Type of entities relationships' -> parent table, child table (table that contains the foreign key). 
 PRAGMA foreign_keys = enforces these rules.
-
+Within the main function, you open the database connection using the open_database_connection function, perform data insertion, and then close the connection using the close_database_connection function. This ensures proper connection management.
 
 # Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
