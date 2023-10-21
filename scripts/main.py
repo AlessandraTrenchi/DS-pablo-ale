@@ -38,12 +38,12 @@ def main():
 
         # Define the tables and their corresponding data sources
         table_sources = {
-            "Publishers": "relational_other_data.json",
+            "Publishers": "data/relational_other_data.json",
             "Event": "relational_publications.csv",
             "Publication": "relational_publications.csv",
             "Identifiable_Entity": "relational_other_data.json",
-            "Person": "relational_other_data.json",
-            "Venue": "relational_other_data.json",
+            "Person": "data/relational_other_data.json",
+            "Venue": "data/relational_publications.csv",
             "Organization": "relational_other_data.json",
             "Book_Chapter": "relational_other_data.json",
             "Journal_Article": "relational_other_data.json",

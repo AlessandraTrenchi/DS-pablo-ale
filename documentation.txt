@@ -157,18 +157,19 @@ This script facilitates the parsing of both CSV and JSON data, making it ready f
 POPULATING THE DATABASE
 #populate.py
 
-After having imported the necessary libraries, the code defines several functions to insert the data into the tables inside the database.
+After having imported the necessary libraries, the code defines several functions to insert data into the tables of a SQLite database.
 
-In the previous approach I developed individual functions for each table in my database, such as insert_publishers, insert_event ... each was responsible for inserting data into its respective table. It was labor intensive and it required code duplication.
-In the updated approach there is a more efficient way of inserting data into tables because there is a Single generic insert function called insert_data which can insert data into any table of my database.
+In the previous approach individual functions were developed for each table in the database, such as insert_publishers, insert_event ... each was responsible for inserting data into its respective table resulting in code duplication and labor-intensive maintenance.
 
-insert_data is a generic function for inserting data into SQL tables, it takes as input cursor - the SQLite cursor object ti execute SQL queries-, table_name, data -dictionary containing column names, values. This function dynamicallt constructs INSERT statements based on the table names and data.
+In the updated approach there is a more efficient way of inserting data into tables because there is a single generic insert function called insert_data. This function is capable of inserting data into any table in the database.
 
-insert_data_from_csv is a function for inserting data from a CSV file into an SQLite table; this function opens the CSV file, reads its contents using a csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
+insert_data is a generic function for inserting data into SQL tables, it takes as input cursor - the SQLite cursor object for executing SQL queries-, table_name (name of the target table), data -dictionary containing column names, values. This function dynamically constructs INSERT statements based on the provided table names and data.
 
-Similarly insert_data_from_json is a function for inserting data from a JSON source into an SQLite table. It takes 3 arguments: cursor, table_name and json_data - a list of dictionaries containing the data. The function iterates through the JSON data and for each dictionary item in the list calls the insert_data function to populate it.
+insert_data_from_csv is a function for inserting data from a CSV file into an SQLite table. It opens the CSV file, reads its contents using a csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
 
-Now these functions will be called inside main.py where the main logic of the relational database unfolds.
+Similarly insert_data_from_json is a function for inserting data from a JSON source into an SQLite table. It takes 3 arguments: cursor, table_name and json_data - a list of dictionaries containing the data. The function iterates through the JSON data and for each dictionary item in the list calls the insert_data function to populate the target table.
+
+These functions are now called within main.py, where the primary logic for managing the relational database is executed.
 
 # main.py
 
@@ -186,3 +187,7 @@ PRAGMA foreign_keys = enforces these rules.
 Within the main function, you open the database connection using the open_database_connection function, perform data insertion, and then close the connection using the close_database_connection function. This ensures proper connection management.
 
 # Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
+
+# CHECK IF I HAVE TABLES IN MY DATABASE.SQL THAT ARE NOT POPULATED YOU DO NOT HAVE TO INCLUDE THEM IN THE TABLE LIST INSIDE POPULATE.PY
+
+# CHECK IF THE TABLES HAVE RELATIONSHIPS CHILD-PARENT -> If you have a table that is part of a bigger table (a child table), and the child table's data is derived from the same data source as the parent table, you don't necessarily need to insert the child table in the table_sources dictionary separately. Instead, you can handle it within the code that populates the parent table (in this case, the "Publication" table) from the data source ("relational_publications.csv").
