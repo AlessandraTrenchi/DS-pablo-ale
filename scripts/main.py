@@ -39,15 +39,14 @@ def main():
         # Define the tables and their corresponding data sources
         table_sources = {
             "Publishers": "data/relational_other_data.json",
-            "Event": "relational_publications.csv",
+            # "Event": "relational_publications.csv",
             "Publication": "relational_publications.csv",
-            "Identifiable_Entity": "relational_other_data.json",
-            "Person": "data/relational_other_data.json",
-            "Venue": "data/relational_publications.csv",
-            "Organization": "relational_other_data.json",
-            "Book_Chapter": "relational_other_data.json",
-            "Journal_Article": "relational_other_data.json",
-            "ProceedingsPaper": "relational_other_data.json",
+            "Authors": "data/relational_other_data.json", #"Person": "data/relational_other_data.json", #Authors' properties
+            #"Venue": "data/relational_publications.csv", #Publication property: title, type 
+            "Venues_id" : "data/relational_other_data.json",
+            "Publisher" : "data/relational_other_data.json"
+           # "Book_Chapter": "relational_other_data.json", #venue_type property
+            # "Journal_Article": "relational_other_data.json", #venue_type property
         }
 
         # Insert data from various sources

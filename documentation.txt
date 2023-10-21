@@ -186,8 +186,15 @@ Type of entities relationships' -> parent table, child table (table that contain
 PRAGMA foreign_keys = enforces these rules.
 Within the main function, you open the database connection using the open_database_connection function, perform data insertion, and then close the connection using the close_database_connection function. This ensures proper connection management.
 
+#methods.py
+
+MAYBE IN METHODS DIVIDE BASED ON THE NAME OF THE PROCESSOR, SO MORE MODULARITY
+
+
 # Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
 
 # CHECK IF I HAVE TABLES IN MY DATABASE.SQL THAT ARE NOT POPULATED YOU DO NOT HAVE TO INCLUDE THEM IN THE TABLE LIST INSIDE POPULATE.PY
+
+NEED TO ADD A VENUE_TYPE TABLE IN DATABASE.SQL and a way to extract its data, am i doing it already?
 
 # CHECK IF THE TABLES HAVE RELATIONSHIPS CHILD-PARENT -> If you have a table that is part of a bigger table (a child table), and the child table's data is derived from the same data source as the parent table, you don't necessarily need to insert the child table in the table_sources dictionary separately. Instead, you can handle it within the code that populates the parent table (in this case, the "Publication" table) from the data source ("relational_publications.csv").
