@@ -12,27 +12,46 @@ def parse_csv(csv_file):
 
 # Function to parse JSON data
 def parse_json(json_file):
-    extracted_data = []  # List to store the extracted dictionaries
+    extracted_data = {}  # Dictionary to store extracted data
     with open(json_file, 'r') as json_data:
         data = json.load(json_data)
-
+    
     print("Processing JSON Data:")
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict):
-                # Extract the entire dictionary
-                extracted_data.append(item)
+    
+    # Handle "authors" section
+    if "authors" in data:
+        extracted_data["authors"] = {}
+        for doi, authors_list in data["authors"].items():
+            extracted_data["authors"][doi] = []
+            for author_info in authors_list:
+                if isinstance(author_info, dict):
+                    extracted_data["authors"][doi].append(author_info)
+    
+    # Handle "venues_id" section
+    if "venues_id" in data:
+        extracted_data["venues_id"] = {}
+        for doi, venues_list in data["venues_id"].items():
+            extracted_data["venues_id"][doi] = venues_list
+    
+    # Handle "publishers" section
+    if "publishers" in data:
+        extracted_data["publishers"] = {}
+        for publisher_id, publisher_info in data["publishers"].items():
+            extracted_data["publishers"][publisher_id] = publisher_info
+    
+    # Handle "references" section
+    if "references" in data:
+        extracted_data["references"] = {}
+        for doi, references_list in data["references"].items():
+            extracted_data["references"][doi] = references_list
+    
+    return extracted_data  # Return the extracted data as a dictionary
 
-                # Optionally, you can print the extracted dictionary
-                print('Extracted Dictionary:')
-                for key, value in item.items():
-                    print(f'{key}: {value}')
-            else:
-                print("Non-dictionary item found in JSON data.")
-    else:
-        print("JSON data format not supported.")
+# Example usage of the function
+if __name__ == "__main__":
+    json_file = 'your_json_file.json'  # Replace with your JSON file's path
+    extracted_data = parse_json(json_file)
 
-    return extracted_data  # Return the extracted dictionaries as a list
 
 # Example usage of the functions
 if __name__ == "__main__":
@@ -45,5 +64,5 @@ if __name__ == "__main__":
     # Parse JSON data
     extracted_data = parse_json(json_file)
 
-    # Now, extracted_data contains a list of dictionaries extracted from the JSON file
+    # Now, extracted_data contains a dictionary with nested dictionaries extracted from the JSON file
     # You can further process, map, or save this data as needed.
