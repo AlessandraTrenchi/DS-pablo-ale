@@ -191,10 +191,28 @@ Within the main function, you open the database connection using the open_databa
 MAYBE IN METHODS DIVIDE BASED ON THE NAME OF THE PROCESSOR, SO MORE MODULARITY
 
 
+
+#impl.py
+
+RelationalDataProcessor class -> designed to handle data-related operations specific to a relational dataabase. It has the purpose of uploading data to the database through the 'uploadData' method which takes a data file path and attempts to upload the data to the specified database. It ensures that the data is correctly processed and inserted in the database.
+
+RelationalProcessor class -> manages the database connection and settings. It provides a single point of access to set (setDbPath) and retrieve (getDbPath) the database path.
+
+
+
+
+
+
+
+
+
+
 # Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
 
 # CHECK IF I HAVE TABLES IN MY DATABASE.SQL THAT ARE NOT POPULATED YOU DO NOT HAVE TO INCLUDE THEM IN THE TABLE LIST INSIDE POPULATE.PY
 
 NEED TO ADD A VENUE_TYPE TABLE IN DATABASE.SQL and a way to extract its data, am i doing it already?
+
+CHECK IF I HAVE EXTRACTED ALL DICTIONARIES FROM THE NESTED DICTIONARIES IN MY JSON FILES!!!!
 
 # CHECK IF THE TABLES HAVE RELATIONSHIPS CHILD-PARENT -> If you have a table that is part of a bigger table (a child table), and the child table's data is derived from the same data source as the parent table, you don't necessarily need to insert the child table in the table_sources dictionary separately. Instead, you can handle it within the code that populates the parent table (in this case, the "Publication" table) from the data source ("relational_publications.csv").

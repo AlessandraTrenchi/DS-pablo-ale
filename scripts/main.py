@@ -44,7 +44,6 @@ def main():
             "Authors": "data/relational_other_data.json", #"Person": "data/relational_other_data.json", #Authors' properties
             #"Venue": "data/relational_publications.csv", #Publication property: title, type 
             "Venues_id" : "data/relational_other_data.json",
-            "Publisher" : "data/relational_other_data.json"
            # "Book_Chapter": "relational_other_data.json", #venue_type property
             # "Journal_Article": "relational_other_data.json", #venue_type property
         }
