@@ -125,21 +125,24 @@ The pandas library is utilized to parse CSV files. It reads the CSV file and loa
 
 
 Function parse_csv 
-- Takes a CSV file path as an argument. 
-- Uses pandas to read the CSV file into a DataFrame.
+- Takes a CSV file path as input. 
+- Uses pandas library to read the CSV file and creates a DataFrame (df).
 - Prints a message indicating that CSV data is being processed.
-- Iterates through each row in the DataFrame. For each row, it further iterates through its columns, printing the column names and their respective values.
+- Iterates through each row in the DataFrame using a 'for' loop with the 'iterrows()' method. 
+- For each row, it prints the row number, then it further iterates through its columns, printing the column names and their respective values.
 
 Parsing JSON Data
-The script also handles the parsing of JSON data. JSON is loaded from a file and stored in a Python dictionary.
+The script also handles the parsing of JSON data. 
+Since the JSON file contains complex hierarchical data with various sections (authors, venues, references and publishers) it extracts the nested dictionaries of each section.
 
-Function parse_json 
-- Takes a JSON file path as argument. 
-- Reads the JSON file and stores its content in the 'data' variable.
-- Initializes an empty dictionary called extracted_data to store the extracted data.
-- Loads the JSON data into a Python dictionary.
-- Processes the JSON data by checking for specific sections and extracting their contents.
-- Returns the 'extracted_data' dictionary, which contains the parsed data from the JSON file.
+parse_json(json_file)
+ - Initialise extracted_data: a dictionary that will store the extracted data from different sections of the JSON file.
+ - Open and load the JSON file into the 'data' variable.
+ - Print a processing message to indicate that it started processing the JSON file.
+ - Extract the 'authors' section in the JSON data, by iterating through each DOI and the associated list of authors, extracting information "family", "given" and "orcid" for each author.
+ - The extracted author data is then stored as dictionaries in the Authors list inside the extracted_data dictionary.
+ 
+In summary, the code treats CSV and JSON data differently because of their distinct formats. CSV data is read into a DataFrame and iterated row by row, while JSON data is parsed with nested loops to extract specific sections of data. The code provides flexibility to handle and extract data from both formats based on their unique characteristics.
 
  Processing "authors" Section
 - Checks for the existence of an "authors" section in the JSON data.

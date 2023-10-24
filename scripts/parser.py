@@ -1,6 +1,15 @@
 import pandas as pd
 import json
 
+# Function to parse CSV data
+def parse_csv(csv_file):
+    df = pd.read_csv(csv_file)
+    print("Processing CSV Data:")
+    for index, row in df.iterrows():
+        print(f'CSV Row {index + 1}:')
+        for column, value in row.items():
+            print(f'{column}: {value}')
+
 # Function to parse JSON data and extract authors, venues, references, and publishers
 def parse_json(json_file):
     extracted_data = {"Authors": [], "Venues": [], "References": [], "Publishers": []}  # Initialize lists to store extracted data
@@ -71,10 +80,11 @@ def parse_json(json_file):
 # Example usage of the functions
 if __name__ == "__main__":
     json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
-
+    csv_file = 'data/relational_publications.csv'
     # Parse JSON data and extract authors, venues, references, and publishers
     extracted_data = parse_json(json_file)
-
+     # Parse CSV data
+    parse_csv(csv_file)
     # Now, extracted_data contains lists of author, venue, reference, and publisher dictionaries, ready for insertion into the respective tables.
     # You can further process, map, or save this data as needed.
     print("Extracted Authors Data:")
