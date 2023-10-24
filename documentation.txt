@@ -197,14 +197,27 @@ MAYBE IN METHODS DIVIDE BASED ON THE NAME OF THE PROCESSOR, SO MORE MODULARITY
 
 #impl.py
 
-RelationalDataProcessor class -> designed to handle data-related operations specific to a relational dataabase. It has the purpose of uploading data to the database through the 'uploadData' method which takes a data file path and attempts to upload the data to the specified database. It ensures that the data is correctly processed and inserted in the database.
+I have integrated populate.py and main.py into impl.py to create a more efficient approach for populating my SQLite database.
 
-RelationalProcessor class -> manages the database connection and settings. It provides a single point of access to set (setDbPath) and retrieve (getDbPath) the database path.
+RelationalDataProcessor Class -> designed to handle data-related operations specific to a relational dataabase. It has the purpose of uploading data to the database through the 'uploadData' method which takes a data file path and attempts to upload the data to the specified database. It ensures that the data is correctly processed and inserted in the database.
 
+RelationalProcessor Class -> manages the database connection and settings. It provides a single point of access to set (setDbPath) and retrieve (getDbPath) the database path. 
 
+insert_data Function: generic function defined in RelationalProcessor class, capable of inserting data into any table of the database. It dynamically constructs SQL INSERT statements based on the provided table names and data.
 
+A function named insert_data_from_csv is defined in the RelationalProcessor class. It opens a CSV file, reads its contents using csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
 
-
+The insert_from_json method the insert_data_from_json method reads data from a JSON file, dynamically constructs SQL queries, inserts the data into the specified table, and handles errors gracefully. The method has three parameters: table_name (the name of the target table), json_file (the path to the JSON source file), and self (the instance of the RelationalProcessor class).
+- It starts by performing some input validation to ensure that the necessary data is provided. If the database path is not set or if the JSON file does not exist, it returns False to indicate that the operation failed.
+- It establishes a connection to the SQLite database. This is done using the sqlite3.connect method and creating a cursor for executing SQL queries.
+- The method opens the JSON file using with open(json_file, 'r') as json_file and reads the content into a Python data structure using json.load(json_file). This results in a list of dictionaries, where each dictionary represents a row of data to be inserted into the table.
+- It then iterates through each dictionary item in the list, which represents a row of data.
+- For each item, it constructs an SQL INSERT query dynamically based on the table name and the keys in the dictionary (which correspond to column names).
+- It generates placeholders for the values using placeholders = ', '.join(['?'] * len(item)), creating as many placeholders as there are values in the row.
+- The query variable is constructed with the INSERT statement to insert the data into the specified table. It includes the column names and placeholders for the values.
+- It then executes the query with the data values using cursor.execute(query, list(item.values())). This inserts the data from the dictionary into the table.
+- After all data has been inserted, the method calls conn.commit() to commit the changes to the database.
+- If an exception occurs during this process, the method catches it, prints an error message, and returns False to indicate that the operation failed. If all goes well, it returns True to indicate that the data insertion was successful.
 
 
 
@@ -216,6 +229,5 @@ RelationalProcessor class -> manages the database connection and settings. It pr
 
 NEED TO ADD A VENUE_TYPE TABLE IN DATABASE.SQL and a way to extract its data, am i doing it already?
 
-CHECK IF I HAVE EXTRACTED ALL DICTIONARIES FROM THE NESTED DICTIONARIES IN MY JSON FILES!!!!
 
 # CHECK IF THE TABLES HAVE RELATIONSHIPS CHILD-PARENT -> If you have a table that is part of a bigger table (a child table), and the child table's data is derived from the same data source as the parent table, you don't necessarily need to insert the child table in the table_sources dictionary separately. Instead, you can handle it within the code that populates the parent table (in this case, the "Publication" table) from the data source ("relational_publications.csv").
