@@ -4,64 +4,200 @@ import json
 import csv
 import pandas as pd
 
-class RelationalDataProcessor:
-    def __init__(self):
-        self.db_path = None
+#data model classes
+class Venue: #classes used to model the structure of the data
+    def __init__(self, id, identifiable_entity_id, title, type):
+        self.id = id
+        self.identifiable_entity_id = identifiable_entity_id
+        self.title = title
+        self.type = type
+        self.publisher = []
 
-    def setDbPath(self, db_path):
-        if os.path.exists(db_path):
-            self.db_path = db_path
-            return True
+    def getTitle(self) -> str:
+        return self.title
+    
+    def addPublisher(self, publisher):
+        self.publisher.add(publisher) #add publishers to the list
+
+    def getPublisher(self)-> 'Organization':
+        return self.publisher
+    #Retrieve the organization (publisher) associated with this venue.
+
+    #Returns: Organization: The Organization object representing the publisher.
+
+class Publication:
+    def __init__(self, id, title, type, publication_year, issue, volume,
+                 chapter, publication_venue, venue_type, publisher_id, event_id):
+        self.id = id
+        self.title = title
+        self.type = type
+        self.publication_year = publication_year
+        self.issue = issue
+        self.volume = volume
+        self.chapter = chapter
+        self.publication_venue = publication_venue
+        self.venue_type = venue_type
+        self.publisher_id = publisher_id
+        self.event_id = event_id
+        self.cited_publications = []
+        self.authors = set()
+        self.publication_venue = None
+        
+    def getPublicationYear(self) -> int or None:
+        if isinstance(self.publication_year, int):
+            return self.publication_year
         else:
-            print(f"Database path '{db_path}' does not exist.")
-            return False
+            return None
 
-    def uploadData(self, path):
-        if not self.db_path:
-            print("Database path is not set. Please set the database path first.")
-            return False
+    def getTitle(self) -> str:
+        return self.title
 
-        if not os.path.exists(path):
-            print(f"File not found: {path}")
-            return False
+    def getCitedPublications(self) -> list['Publication']:
+        # return the list of cited publications for this publication
+        return self.cited_publications  
+    def addCitedPublication(self, publication):
+        self.cited_publications.append(publication)
 
+    def getPublicationVenue(self) -> Venue or None: #retrieve information about a publication, return None if the Venue is not set
+        """
+        Retrieve the publication venue associated with this publication.
+
+        Returns:
+            Venue: The Venue object representing the publication venue.
+        """
+        return self.publication_venue
+    
+    def addPublicationVenue(self, venue): #associate or link one publication to another
+        """
+        Associate a publication with a publication venue.
+
+        Args:
+            venue (Venue): The Venue object representing the publication venue.
+        """
+        self.publication_venue = venue
+
+    def getAuthors(self) -> set['Person']:
+        #return the set of authors associated with this publication
+        return self.authors  
+    
+    def addAuthor(self, author):
+        self.authors.add(author)
+
+
+class IdentifiableEntity:
+    def __init__(self, id):
+        self.id = id
+    
+    def getIds(self) -> list [str]: #Returns a list containing the ID of this entity
+        return [self.id] #Retrieve a list containing the ID of this identifiable entity.
+
+
+class Person:
+    def __init__(self, id, identifiable_entity_id, given_name, family_name):
+        self.id = id
+        self.identifiable_entity_id = identifiable_entity_id
+        self.given_name = given_name
+        self.family_name = family_name
+
+    def getGivenName (self) -> str:
+        return self.given_name
+    
+    def getFamilyName(self) -> str:
+        return self.family_name
+    
+class Organization:
+    def __init__(self, id, identifiable_entity_id, name):
+        self.id = id
+        self.identifiable_entity_id = identifiable_entity_id
+        self.name = name
+
+    def getName(self) -> str:
+        return self.name
+
+class BookChapter:
+    def __init__(self, id, publication_id, chapter_number):
+        self.id = id
+        self.publication_id = publication_id
+        self.chapter_number = chapter_number
+
+    def getChapterNumber(self) -> int:
+        return self.chapter_number
+
+class JournalArticle:
+    def __init__(self, id, publication_Id, issue, volume):
+        self.id = id
+        self.publication_Id = publication_Id
+        self.issue = issue
+        self.volume = volume
+
+    def getIssue(self) -> str or None:
+        if isinstance(self.issue, str):
+            return self.issue
+        else:
+            return None
+        
+    def getVolume(self) -> str or None:
+        if isinstance(self.volume, str):
+            return self.volume
+        else:
+            return None
+
+class ProceedingsPaper:
+    pass
+
+class Journal:
+    pass
+
+class Book:
+    pass
+
+class Proceedings:
+    def __init__(self, id, venue_id, event):
+        self.id = id
+        self.venue_id = venue_id
+        self.event = event
+
+    def getEvent(self) -> str:
+        return self.event
+    
+
+class RelationalDataProcessor:
+    def __init__(self, db_path):
+        self.db_path = db_path
+        self.db_connection = None
+
+    def uploadData(self, path: str) -> bool:
         try:
-            # Your data upload logic here
-            print(f"Data uploaded from {path} to {self.db_path}")
-            return True
+            # Connect to the SQLite database
+            self.db_connection = sqlite3.connect(self.db_path)
+
+            # Perform the data upload operation here
+            # You can add code to read and insert data from the specified path
+
+            # Commit the changes to the database
+            self.db_connection.commit()
+            
+            return True  # Return True if the operation is successful
         except Exception as e:
-            print(f"Error uploading data: {str(e)}")
-            return False
+            # Handle any exceptions or errors that may occur during the upload
+            print(f"Error during data upload: {str(e)}")
+            return False  # Return False to indicate that the operation failed
 
-    def parse_json_to_dataframe(self, json_file):
-        if not os.path.exists(json_file):
-            print(f"JSON file not found: {json_file}")
-            return None
+    def closeConnection(self):
+        if self.db_connection:
+            self.db_connection.close()
 
-        try:
-            with open(json_file, 'r') as json_data:
-                data = json.load(json_data)
+class RelationalProcessor(RelationalDataProcessor):
+    def __init__(self, db_connection):
+        super().__init__(db_connection)
+        self.db_path = None  # Initialize db_path as None or set a default path
 
-            # Your DataFrame creation logic here
-            # You need to define the DataFrame structure based on your data
-            df = pd.DataFrame(data)
+    def getDbPath(self) -> str:
+        return self.db_path
 
-            return df
-        except Exception as e:
-            print(f"Error parsing JSON to DataFrame: {str(e)}")
-            return None
-
-    def parse_csv_to_dataframe(self, csv_file):
-        if not os.path.exists(csv_file):
-            print(f"CSV file not found: {csv_file}")
-            return None
-
-        try:
-            df = pd.read_csv(csv_file)
-            return df
-        except Exception as e:
-            print(f"Error parsing CSV to DataFrame: {str(e)}")
-            return None
+    def setDbPath(self, path: str) -> bool:
+        self.db_path = path
+        return True
 
 class RelationalQueryProcessor(RelationalDataProcessor):
     def __init__(self, db_connection):
@@ -76,6 +212,7 @@ class RelationalQueryProcessor(RelationalDataProcessor):
         # Define the SQL query to get publications by author ID
         query = f"SELECT * FROM Publications WHERE author_id = '{author_id}'"
         return pd.read_sql_query(query, self.db_connection)
+    
     def getMostCitedPublication(self):
         # Define the SQL query to get the most cited publication
         query = "SELECT * FROM Publications ORDER BY citation_count DESC LIMIT 1"
@@ -92,6 +229,7 @@ class RelationalQueryProcessor(RelationalDataProcessor):
             LIMIT 1
         """
         return pd.read_sql_query(query, self.db_connection)
+
     def getVenuesByPublisherId(self, publisher_id):
         # Define the SQL query to get venues by publisher ID
         query = f"SELECT * FROM Venues WHERE publisher_id = '{publisher_id}'"
@@ -111,7 +249,9 @@ class RelationalQueryProcessor(RelationalDataProcessor):
             AND volume = '{volume}'
             AND journal_id = '{journal_id}'
         """
-        def getJournalArticlesInVolume(self, volume, journal_id):
+        return pd.read_sql_query(query, self.db_connection)
+
+    def getJournalArticlesInVolume(self, volume, journal_id):
         # Define the SQL query to get journal articles in a specific volume
         query = f"""
             SELECT * FROM Publications
@@ -172,13 +312,150 @@ class RelationalQueryProcessor(RelationalDataProcessor):
         """
         return pd.read_sql_query(query, self.db_connection)
     
+
 class RelationalProcessor(RelationalQueryProcessor):
-    def __init__(self, db_connection):
+   def __init__(self, db_connection):
         super().__init__(db_connection)
+        self.db_path = None  # Initialize db_path as None or set a default path
+        
+        def getDbPath(self) -> str:
+        # Implement the method to get the database path
+        # Return the path as a string
+          return self.db_path
+        
+        def setDbPath(self, path: str) -> bool:
+        # Implement the method to set the database path
+        # You can add logic to validate the path or handle any specific behavior
+          self.db_path = path
+          return True  # Return True if the operation is successful, or add error handling logic if needed
 
-    # Implement other query methods as described
+def parse_csv(csv_file):
+    # Function to parse CSV data
+    df = pd.read_csv(csv_file)
+    print("Processing CSV Data:")
+    for index, row in df.iterrows():
+        print(f'CSV Row {index + 1}:')
+        for column, value in row.items():
+            print(f'{column}: {value}')
 
-if __name__ == "__main__":
+def parse_json(json_file):
+    # Function to parse JSON data and extract authors, venues, references, and publishers
+    extracted_data = {"Authors": [], "Venues": [], "References": [], "Publishers": []}  # Initialize lists to store extracted data
+
+    with open(json_file, 'r') as json_data:
+        data = json.load(json_data)
+
+    print("Processing JSON Data:")
+
+
+    # Handle the "authors" section if it exists
+    if "authors" in data:
+        authors_data = data["authors"]
+        for doi, authors_list in authors_data.items():
+            for author_info in authors_list:
+                if isinstance(author_info, dict):
+                    extracted_author = {
+                        "DOI": doi,
+                        "family": author_info.get("family", ""),
+                        "given": author_info.get("given", ""),
+                        "orcid": author_info.get("orcid", ""),
+                    }
+                    extracted_data["Authors"].append(extracted_author)
+
+    # Handle the "venues_id" section if it exists
+    if "venues_id" in data:
+        venues_data = data["venues_id"]
+        for doi, identifiers_list in venues_data.items():
+            for identifier in identifiers_list:
+                if isinstance(identifier, dict):
+                    # Depending on the actual structure of the "venues_id" data, extract "issn" and "isbn"
+                    issn = identifier.get("issn", "")
+                    isbn = identifier.get("isbn", "")
+
+                    extracted_venue = {
+                        "DOI": doi,
+                        "issn": issn,
+                        "isbn": isbn,
+                    }
+                    extracted_data["Venues"].append(extracted_venue)
+
+    # Handle the "references" section if it exists
+    if "references" in data:
+        references_data = data["references"]
+        for doi, references_list in references_data.items():
+            for reference_info in references_list:
+                if isinstance(reference_info, dict):
+                    extracted_reference = {
+                        "DOI": doi,
+                        "reference_DOI": reference_info.get("reference_DOI", ""),
+                        "other_data": reference_info.get("other_data", []),
+                    }
+                    extracted_data["References"].append(extracted_reference)
+
+    # Handle the "publishers" section if it exists
+    if "publishers" in data:
+        publishers_data = data["publishers"]
+        for publisher_id, publisher_info in publishers_data.items():
+            if "crossref" in publisher_info:
+                crossref_data = publisher_info["crossref"]
+                extracted_publisher = {
+                    "publisher_id": publisher_id,
+                    "name": crossref_data.get("name", ""),
+                }
+                extracted_data["Publishers"].append(extracted_publisher)
+
+    return extracted_data
+
+def main():
+    json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
+    csv_file = 'data/relational_publications.csv'
+    extracted_data = parse_json(json_file)
+    parse_csv(csv_file)
+    print("Extracted Authors Data:")
+    for author in extracted_data["Authors"]:
+        print(author)
+
+    print("Extracted Venues Data:")
+    for venue in extracted_data["Venues"]:
+        print(venue)
+
+    print("Extracted References Data:")
+    for reference in extracted_data["References"]:
+        print(reference)
+
+    print("Extracted Publishers Data:")
+    for publisher in extracted_data["Publishers"]:
+        print(publisher)
+
+
+# Example usage of the functions
+if __name__ == "__main":
+    json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
+    csv_file = 'data/relational_publications.csv'
+    # Parse JSON data and extract authors, venues, references, and publishers
+    extracted_data = parse_json(json_file)
+    # Parse CSV data
+    parse_csv(csv_file)
+    # Now, extracted_data contains lists of author, venue, reference, and publisher dictionaries, ready for insertion into the respective tables.
+    # You can further process, map, or save this data as needed.
+    print("Extracted Authors Data:")
+    for author in extracted_data["Authors"]:
+        print(author)
+
+    print("Extracted Venues Data:")
+    for venue in extracted_data["Venues"]:
+        print(venue)
+
+    print("Extracted References Data:")
+    for reference in extracted_data["References"]:
+        print(reference)
+
+    print("Extracted Publishers Data:")
+    for publisher in extracted_data["Publishers"]:
+        print(publisher)
+
+
+if __name__ == "__main":
     # Create an instance of RelationalDataProcessor
     data_processor = RelationalDataProcessor()
     data_processor.setDbPath("./pabloale.db")  # Setting the database path
@@ -194,11 +471,6 @@ if __name__ == "__main__":
 
     # Now you can use each variable independently:
     # data_processor for data processing, query_processor for querying, and processor for additional processing
-
-    # Setting the database path
-    success = data_processor.setDbPath("./pabloale.db")
-    if success:
-        print("Database path set successfully")
 
     # Uploading data
     data_path = "/data/data_to_upload.txt"  # Path to the data file
