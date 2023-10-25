@@ -6,8 +6,8 @@ import pandas as pd
 
 #data model classes
 class Venue: #classes used to model the structure of the data
-    def __init__(self, id, identifiable_entity_id, title, type):
-        self.id = id
+    def __init__(self, venue_id, identifiable_entity_id, title, type):
+        self.venue_id = venue_id
         self.identifiable_entity_id = identifiable_entity_id
         self.title = title
         self.type = type
@@ -26,9 +26,9 @@ class Venue: #classes used to model the structure of the data
     #Returns: Organization: The Organization object representing the publisher.
 
 class Publication:
-    def __init__(self, id, title, type, publication_year, issue, volume,
+    def __init__(self, publication_id, title, type, publication_year, issue, volume,
                  chapter, publication_venue, venue_type, publisher_id, event_id):
-        self.id = id
+        self.publication_id = publication_id
         self.title = title
         self.type = type
         self.publication_year = publication_year
@@ -85,16 +85,16 @@ class Publication:
 
 
 class IdentifiableEntity:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, identifiable_entity_id):
+        self.identifiable_entity_id = identifiable_entity_id
     
     def getIds(self) -> list [str]: #Returns a list containing the ID of this entity
-        return [self.id] #Retrieve a list containing the ID of this identifiable entity.
+        return [self.identifiable_entity_id] #Retrieve a list containing the ID of this identifiable entity.
 
 
 class Person:
-    def __init__(self, id, identifiable_entity_id, given_name, family_name):
-        self.id = id
+    def __init__(self, person_id, identifiable_entity_id, given_name, family_name):
+        self.person_id = person_id
         self.identifiable_entity_id = identifiable_entity_id
         self.given_name = given_name
         self.family_name = family_name
@@ -106,8 +106,8 @@ class Person:
         return self.family_name
     
 class Organization:
-    def __init__(self, id, identifiable_entity_id, name):
-        self.id = id
+    def __init__(self, organization_id, identifiable_entity_id, name):
+        self.organization_id = organization_id
         self.identifiable_entity_id = identifiable_entity_id
         self.name = name
 
@@ -115,8 +115,8 @@ class Organization:
         return self.name
 
 class BookChapter:
-    def __init__(self, id, publication_id, chapter_number):
-        self.id = id
+    def __init__(self, book_chapter_id, publication_id, chapter_number):
+        self.book_chapter_id = book_chapter_id
         self.publication_id = publication_id
         self.chapter_number = chapter_number
 
@@ -124,8 +124,8 @@ class BookChapter:
         return self.chapter_number
 
 class JournalArticle:
-    def __init__(self, id, publication_Id, issue, volume):
-        self.id = id
+    def __init__(self, journal_article_id, publication_Id, issue, volume):
+        self.journal_article_id = journal_article_id
         self.publication_Id = publication_Id
         self.issue = issue
         self.volume = volume
@@ -152,8 +152,8 @@ class Book:
     pass
 
 class Proceedings:
-    def __init__(self, id, venue_id, event):
-        self.id = id
+    def __init__(self, proceedings_id, venue_id, event):
+        self.proceedings_id = proceedings_id
         self.venue_id = venue_id
         self.event = event
 
@@ -168,21 +168,29 @@ class RelationalDataProcessor:
 
     def uploadData(self, path: str) -> bool:
         try:
-            # Connect to the SQLite database
-            self.db_connection = sqlite3.connect(self.db_path)
+        # Connect to the SQLite database
+          self.db_connection = sqlite3.connect(self.db_path)
 
-            # Perform the data upload operation here
-            # You can add code to read and insert data from the specified path
+        # Assuming path is a JSON file
+          if path.endswith(".json"):
+            extracted_data = parse_json(path)
+            # Perform the data upload operation here, you can use extracted_data as needed
+            # For example, you can insert the extracted data into your database tables.
 
-            # Commit the changes to the database
-            self.db_connection.commit()
-            
-            return True  # Return True if the operation is successful
+        # Assuming path is a CSV file
+          elif path.endswith(".csv"):
+            parse_csv(path)
+            # Perform the data upload operation here, you can process the CSV data as needed
+
+        # Commit the changes to the database
+          self.db_connection.commit()
+
+          return True  # Return True if the operation is successful
         except Exception as e:
-            # Handle any exceptions or errors that may occur during the upload
-            print(f"Error during data upload: {str(e)}")
-            return False  # Return False to indicate that the operation failed
-
+        # Handle any exceptions or errors that may occur during the upload
+          print(f"Error during data upload: {str(e)}")
+          return False  # Return False to indicate that the operation failed
+        
     def closeConnection(self):
         if self.db_connection:
             self.db_connection.close()
@@ -200,7 +208,8 @@ class RelationalProcessor(RelationalDataProcessor):
         return True
 
 class RelationalQueryProcessor(RelationalDataProcessor):
-    def __init__(self, db_connection):
+    def __init__(self, db_path, db_connection):
+        super().__init__(db_path)
         self.db_connection = db_connection
 
     def getPublicationPublishedInYear(self, year):
@@ -314,8 +323,8 @@ class RelationalQueryProcessor(RelationalDataProcessor):
     
 
 class RelationalProcessor(RelationalQueryProcessor):
-   def __init__(self, db_connection):
-        super().__init__(db_connection)
+   def __init__(self, db_path, db_connection):
+        super().__init__(db_path, db_connection)
         self.db_path = None  # Initialize db_path as None or set a default path
         
         def getDbPath(self) -> str:
@@ -429,7 +438,7 @@ def main():
 
 
 # Example usage of the functions
-if __name__ == "__main":
+if __name__ == "__main__":
     json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
     csv_file = 'data/relational_publications.csv'
     # Parse JSON data and extract authors, venues, references, and publishers

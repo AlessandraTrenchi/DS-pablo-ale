@@ -129,4 +129,4 @@ CREATE TABLE Publishers ( /*same name as in the json file, but with capital case
     publication_id INT REFERENCES Publications(id)
 ); 
 
--- Populating the tables in populate.py
+
