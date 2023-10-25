@@ -5,25 +5,29 @@ import csv
 import pandas as pd
 
 #data model classes
-class Venue: #classes used to model the structure of the data
-    def __init__(self, venue_id, identifiable_entity_id, title, type):
-        self.venue_id = venue_id
+class Venue:
+    def __init__(self, venues_id, identifiable_entity_id, title, type):
+        self.venues_id = venues_id
         self.identifiable_entity_id = identifiable_entity_id
         self.title = title
         self.type = type
-        self.publisher = []
+        self.publishers = set()  # Use a set to store related Organization objects
 
     def getTitle(self) -> str:
         return self.title
-    
+
     def addPublisher(self, publisher):
-        self.publisher.add(publisher) #add publishers to the list
+        self.publishers.add(publisher)
 
-    def getPublisher(self)-> 'Organization':
-        return self.publisher
-    #Retrieve the organization (publisher) associated with this venue.
+    def getPublishers(self) -> set['Organization']:
+        return self.publishers
 
-    #Returns: Organization: The Organization object representing the publisher.
+    def setIdentifiableEntity(self, identifiable_entity):
+        self.identifiable_entity = identifiable_entity
+
+    def getIdentifiableEntity(self) -> 'IdentifiableEntity':
+        return self.identifiable_entity
+
 
 class Publication:
     def __init__(self, publication_id, title, type, publication_year, issue, volume,
@@ -123,12 +127,25 @@ class BookChapter:
     def getChapterNumber(self) -> int:
         return self.chapter_number
 
+class Book:
+    def __init__(self, book_id, venue=None):
+        self.book_id = book_id
+        self.venue = venue  # Establish the relationship with Venue (optional)
+
+    def setVenue(self, venue: 'Venue'):
+        self.venue = venue
+
+    def getVenue(self) -> 'Venue':
+        return self.venue
+
+
 class JournalArticle:
-    def __init__(self, journal_article_id, publication_Id, issue, volume):
+    def __init__(self, journal_article_id, publication_id, issue: str = None, volume: str = None):
         self.journal_article_id = journal_article_id
-        self.publication_Id = publication_Id
+        self.publication_id = publication_id  # Make sure the attribute names match the SQL column names
         self.issue = issue
         self.volume = volume
+        self.publication = None  # Add a reference to the associated Publication
 
     def getIssue(self) -> str or None:
         if isinstance(self.issue, str):
@@ -142,24 +159,50 @@ class JournalArticle:
         else:
             return None
 
-class ProceedingsPaper:
-    pass
+    def setPublication(self, publication: 'Publication'):
+        self.publication = publication
+
+    def getPublication(self) -> 'Publication':
+        return self.publication
+
+
+
 
 class Journal:
-    pass
+    def __init__(self):
+        self.venue = None
 
-class Book:
-    pass
+    def setVenue(self, venue: 'Venue'):
+        self.venue = venue
+
+    def getVenue(self) -> 'Venue':
+        return self.venue
+
 
 class Proceedings:
-    def __init__(self, proceedings_id, venue_id, event):
+    def __init__(self, proceedings_id, event, venue_id=None):
         self.proceedings_id = proceedings_id
-        self.venue_id = venue_id
         self.event = event
+        self.venue_id = venue_id  # Establish the relationship with Venue (optional)
 
     def getEvent(self) -> str:
         return self.event
-    
+
+    def getVenueID(self) -> int:
+        return self.venue_id
+
+
+class ProceedingsPaper:
+    def __init__(self, proceedings_id, publication_id):
+        self.proceedings_id = proceedings_id
+        self.publication_id = publication_id
+
+    def getProceedingsID(self) -> int:
+        return self.proceedings_id
+
+    def getPublicationID(self) -> str:
+        return self.publication_id
+
 
 class RelationalDataProcessor:
     def __init__(self, db_path):
@@ -230,10 +273,10 @@ class RelationalQueryProcessor(RelationalDataProcessor):
     def getMostCitedVenue(self):
         # Define the SQL query to get the most cited venue
         query = """
-            SELECT Venues.venue_id, Venues.name, SUM(Publications.citation_count) AS total_citations
+            SELECT Venues.venues_id, Venues.name, SUM(Publications.citation_count) AS total_citations
             FROM Venues
-            JOIN Publications ON Venues.venue_id = Publications.venue_id
-            GROUP BY Venues.venue_id, Venues.name
+            JOIN Publications ON Venues.venues_id = Publications.venues_id
+            GROUP BY Venues.venues_id, Venues.name
             ORDER BY total_citations DESC
             LIMIT 1
         """
@@ -244,9 +287,9 @@ class RelationalQueryProcessor(RelationalDataProcessor):
         query = f"SELECT * FROM Venues WHERE publisher_id = '{publisher_id}'"
         return pd.read_sql_query(query, self.db_connection)
 
-    def getPublicationInVenue(self, venue_id):
+    def getPublicationInVenue(self, venues_id):
         # Define the SQL query to get publications in a specific venue
-        query = f"SELECT * FROM Publications WHERE venue_id = '{venue_id}'"
+        query = f"SELECT * FROM Publications WHERE venues_id = '{venues_id}'"
         return pd.read_sql_query(query, self.db_connection)
 
     def getJournalArticlesInIssue(self, issue, volume, journal_id):

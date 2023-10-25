@@ -7,13 +7,13 @@ USE pabloale;
 
 
 CREATE TABLE Event (/*event table is a property of Publication*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    event_id INT PRIMARY KEY AUTO_INCREMENT,
     event_detail VARCHAR(50),
-    UNIQUE (id)
+    UNIQUE (event_id)
 );
 
 CREATE TABLE Publication (
-    id VARCHAR(255) PRIMARY KEY,
+    publication_id VARCHAR(255) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL,
     publication_year INT NOT NULL,
@@ -22,39 +22,45 @@ CREATE TABLE Publication (
     chapter INT,
     publication_venue VARCHAR(255) NOT NULL,
     venue_type VARCHAR(50) NOT NULL,
-    publisher VARCHAR(50),
-    event INT,
-    UNIQUE (id),
-    FOREIGN KEY (publisher) REFERENCES Publisher(id),
-    FOREIGN KEY (event_id) REFERENCES Event(id)
+    publisher_id VARCHAR(255),
+    event_id INT,
+    UNIQUE (publication_id),
+    FOREIGN KEY (publisher_id) REFERENCES Publisher(publisher_id),
+    FOREIGN KEY (event_id) REFERENCES Event(event_id)
+    FOREIGN KEY (identifiable_entity_id) REFERENCES Identifiable_Entity(identifiable_entity_id)
+
 );
+
 
 /* Entities from JSON structure and reference UML */
 CREATE TABLE Identifiable_Entity ( /*probably an auxiliary table, maybe DOI inside Venue what if there is a hierarchical relationship? in the sense that identifiableEntity/DOI contains */
-    id VARCHAR(50) PRIMARY KEY,
-    UNIQUE (id)
+    identiable_entity_id VARCHAR(50) PRIMARY KEY,
+    UNIQUE (identiable_entity_id)
 );
 
-CREATE TABLE Person ( /* properties of Authors*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    identifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
-    UNIQUE (id),
+CREATE TABLE Person (
+    person_id INT PRIMARY KEY AUTO_INCREMENT,
+    identifiable_entity_id VARCHAR(50) REFERENCES Identifiable_Entity(identifiable_entity_id),
+    UNIQUE (person_id),
     family VARCHAR(50) NOT NULL,
     given VARCHAR(50) NOT NULL
-    );
-
-CREATE TABLE Venue ( /*it's a part of Publication-*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
-    title VARCHAR(255),
-    UNIQUE (id),
-    type VARCHAR(50) NOT NULL
 );
 
+
+CREATE TABLE Venue (
+    venues_id INT PRIMARY KEY AUTO_INCREMENT,
+    identifiable_entity_id VARCHAR(50),
+    title VARCHAR(255),
+    type VARCHAR(50) NOT NULL,
+    UNIQUE (venues_id),
+    FOREIGN KEY (identifiable_entity_id) REFERENCES Identifiable_Entity(identifiable_entity_id)
+);
+
+
 CREATE TABLE Organization ( /*auxiliary table or part of Publishers*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    IdentifiableEntityId VARCHAR(50) REFERENCES Identifiable_Entity(id),
-    UNIQUE (id),
+    organization_id INT PRIMARY KEY AUTO_INCREMENT,
+    identifiable_entity_id VARCHAR(50) REFERENCES Identifiable_Entity(identifiable_entity_id),
+    UNIQUE (organization_id),
     name VARCHAR(255) NOT NULL
 );
 
@@ -70,54 +76,76 @@ CREATE TABLE Organization ( /*auxiliary table or part of Publishers*/
     CitedPublicationId VARCHAR(255) REFERENCES Publication(id)
 );**/
 
-CREATE TABLE Book_Chapter ( /*type parameter of Publication*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    PublicationId VARCHAR(255) REFERENCES Publication(id),
-    UNIQUE (id),
+CREATE TABLE Book_Chapter (
+    book_chapter_id INT PRIMARY KEY AUTO_INCREMENT,
+    publication_id VARCHAR(255) REFERENCES Publication(publication_id),
+    UNIQUE (book_chapter_id),
     chapterNumber INT NOT NULL
 );
 
-CREATE TABLE Journal_Article ( /*type parameter of publication*/
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    UNIQUE (id),
-    PublicationId VARCHAR(255) REFERENCES Publication(id)
+CREATE TABLE Book (
+    book_id INT PRIMARY KEY AUTO_INCREMENT,
+    venue_id INT,
+    FOREIGN KEY (venue_id) REFERENCES Venue(venue_id)
 );
 
-CREATE TABLE Proceedings_Paper ( /*maybe auxiliary table because there are no type of publication called like this */
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    UNIQUE (id),
-    PublicationId VARCHAR(255) REFERENCES Publication(id)
+
+CREATE TABLE Journal_Article (
+    journal_article_id INT PRIMARY KEY AUTO_INCREMENT,
+    UNIQUE (journal_article_id),
+    publication_id VARCHAR(255) REFERENCES Publication(publication_id)
 );
+
+CREATE TABLE Journal (
+    journal_id INT PRIMARY KEY AUTO_INCREMENT,
+    venue_id INT,
+    FOREIGN KEY (venue_id) REFERENCES Venue(venue_id)
+);
+
+
+CREATE TABLE Proceedings (
+    proceedings_id INT PRIMARY KEY AUTO_INCREMENT,
+    event VARCHAR(255) NOT NULL,
+    venue_id INT,
+    FOREIGN KEY (venue_id) REFERENCES Venue(venue_id)
+);
+
+CREATE TABLE Proceedings_Paper (
+    proceedings_id INT PRIMARY KEY AUTO_INCREMENT,
+    UNIQUE (proceedings_id),
+    publication_id VARCHAR(255) REFERENCES Publication(publication_id)
+);
+
 
 -- from JSON
 
 CREATE TABLE Authors ( /*same name as in the dataset, but there it is not camel case*/
-    id SERIAL PRIMARY KEY, /*forse dovrebbe essere doi, which contains family given and orchid inside*/
+    authors_id SERIAL PRIMARY KEY, /*forse dovrebbe essere doi, which contains family given and orchid inside*/
     family VARCHAR(100) NOT NULL,
     given VARCHAR(100) NOT NULL,
     orcid VARCHAR(50) NOT NULL,
     publication_id VARCHAR(255) NOT NULL,
     UNIQUE (id),
-    FOREIGN KEY (publication_id) REFERENCES Publication(id)
+    FOREIGN KEY (publication_id) REFERENCES Publication(publication_id)
 );
 
-CREATE TABLE Publications ( /*could be inside authors or venues_id*/
-    id VARCHAR(255) PRIMARY KEY,
+CREATE TABLE Publication ( /*could be inside authors or venues_id*/
+    publication_id VARCHAR(255) PRIMARY KEY,
     doi VARCHAR(50) NOT NULL,
     UNIQUE (id, doi)
 );
 
 CREATE TABLE References ( /*useful to establish relationships between publications*/
-    id SERIAL PRIMARY KEY,
+    references_id SERIAL PRIMARY KEY,
     source_doi VARCHAR(255) NOT NULL,
     target_doi VARCHAR(255) NOT NULL,
     UNIQUE (id, doi)
-    FOREIGN KEY (source_doi) REFERENCES Publications(doi),
-    FOREIGN KEY (target_doi) REFERENCES Publications(doi)
+    FOREIGN KEY (source_doi) REFERENCES Publication(doi),
+    FOREIGN KEY (target_doi) REFERENCES Publication(doi)
 );
 
 CREATE TABLE Publishers ( /*same name as in the json file, but with capital case here*/
-    id VARCHAR(255) PRIMARY KEY,
+    publishers_id VARCHAR(255) PRIMARY KEY,
     UNIQUE (id)
     name VARCHAR(255) NOT NULL
 );
