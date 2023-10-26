@@ -209,34 +209,43 @@ class RelationalDataProcessor:
         self.db_path = db_path
         self.db_connection = None
 
-    def uploadData(self, path: str) -> bool:
+    def openConnection(self):
         try:
-        # Connect to the SQLite database
-          self.db_connection = sqlite3.connect(self.db_path)
-
-        # Assuming path is a JSON file
-          if path.endswith(".json"):
-            extracted_data = parse_json(path)
-            # Perform the data upload operation here, you can use extracted_data as needed
-            # For example, you can insert the extracted data into your database tables.
-
-        # Assuming path is a CSV file
-          elif path.endswith(".csv"):
-            parse_csv(path)
-            # Perform the data upload operation here, you can process the CSV data as needed
-
-        # Commit the changes to the database
-          self.db_connection.commit()
-
-          return True  # Return True if the operation is successful
+            # Connect to the SQLite database
+            self.db_connection = sqlite3.connect(self.db_path)
+            return True
         except Exception as e:
-        # Handle any exceptions or errors that may occur during the upload
-          print(f"Error during data upload: {str(e)}")
-          return False  # Return False to indicate that the operation failed
-        
+            print(f"Error while connecting to the database: {str(e)}")
+            return False
+
     def closeConnection(self):
         if self.db_connection:
             self.db_connection.close()
+
+    def uploadData(self, path: str) -> bool:
+        if not self.db_connection:
+            if not self.openConnection():
+                return False
+
+        try:
+            # Depending on the file extension, call the appropriate data processing function
+            if path.endswith(".json"):
+                extracted_data = self.parse_json(path)
+                # Perform the data upload operation here, you can use extracted_data as needed
+                # For example, you can insert the extracted data into your database tables.
+
+            elif path.endswith(".csv"):
+                self.parse_csv(path)
+                # Perform the data upload operation here, you can process the CSV data as needed
+
+            # Commit the changes to the database
+            self.db_connection.commit()
+
+            return True  # Return True if the operation is successful
+        except Exception as e:
+            # Handle any exceptions or errors that may occur during the upload
+            print(f"Error during data upload: {str(e)}")
+            return False  # Return False to indicate that the operation failed
 
 class RelationalProcessor(RelationalDataProcessor):
     def __init__(self, db_connection):
