@@ -534,7 +534,7 @@ if __name__ == "__main":
     # data_processor for data processing, query_processor for querying, and processor for additional processing
 
     # Uploading data
-    data_path = "/data/data_to_upload.txt"  # Path to the data file
+    data_path = "/data"  # Path to the data file, is it correct?
     upload_success = data_processor.uploadData(data_path)
     if upload_success:
         print("Data upload successful")
