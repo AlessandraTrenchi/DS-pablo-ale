@@ -561,4 +561,4 @@ if __name__ == "__main":
         print("Publications published in 2022:")
         print(publications_2022)
 # Close the database connection
-data_processor.closeConnection()
+    data_processor.closeConnection()
