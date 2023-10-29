@@ -2,7 +2,8 @@ Data Processing and Querying Software Documentation
 
 In this comprehensive guide, we will provide you with a detailed overview of our software solution designed to address the challenges of processing data stored in different formats and simultaneously querying two distinct types of databases: a Graph Database and a Relational Database.
 
-A relational database stores data in structured tables with rows and columns, allowing an easier organization for large volumes of data (data storage). It allows retrieving data using SQL - structured query language by specifying the criteria to select, filter and sort data. Relational databases handle relationships between sets of data by using foreign keys and joins, using indexes to improve query performance.
+Relational Database Basics
+A relational database is a structured way to store and manage data. It uses tables with rows and columns, making it ideal for organizing large volumes of data. SQL (Structured Query Language) is used to retrieve data from relational databases by specifying criteria to select, filter, and sort data. Relationships between different data sets are established using foreign keys and joins, and indexes are used to optimize query performance.
 
 From DATA -> raw information that needs to be processed. relational_other_data.json, relational_publications.csv
 
@@ -12,13 +13,13 @@ RELATIONAL PROCESSOR -> The RelationalProcessor class is an extension of the Rel
 
 RELATIONAL QUERY PROCESSOR -> module of a relational database responsible for processing SQL queries. Functions: query planning, execution, interpretation and optimization to retrieve data efficiently from the relational database.
 
-TRIPLESTORE DATA PROCESSOR ->
+TRIPLESTORE DATA PROCESSOR ->  to upload data to an RDF triplestore.
 
-TRIPLESTORE PROCESSOR ->
+TRIPLESTORE PROCESSOR -> for executing predefined queries on the triplestore.
 
-TRIPLESTORE QUERY PROCESSOR ->
+TRIPLESTORE QUERY PROCESSOR -> for managing the SPARQL endpoint URL.
 
-GENERIC QUERY PROCESSOR -> handles queries for different types of data stores (relational and graph database).
+GENERIC QUERY PROCESSOR -> handles queries for different types of data stores (relational and graph database). It combines and executse queries on both the relational database and RDF triplestore. It aggregates results from different query processors.
 
 PYTHON OBJECTS -> once the data is retrieved from the database or processed by a query processor it can be mapped to python objects for further application-level processing.
 
@@ -164,7 +165,6 @@ This script facilitates the parsing of both CSV and JSON data, making it ready f
 
 
 POPULATING THE DATABASE
-#populate.py
 
 After having imported the necessary libraries, the code defines several functions to insert data into the tables of a SQLite database.
 
@@ -229,11 +229,3 @@ The insert_from_json method the insert_data_from_json method reads data from a J
 
 
 
-# Performance testing : to be developed -> Run queries that simulate real-world scenarios and measure query execution times. Identify and add indexes to improve performance if necessary.
-
-# CHECK IF I HAVE TABLES IN MY DATABASE.SQL THAT ARE NOT POPULATED YOU DO NOT HAVE TO INCLUDE THEM IN THE TABLE LIST INSIDE POPULATE.PY
-
-NEED TO ADD A VENUE_TYPE TABLE IN DATABASE.SQL and a way to extract its data, am i doing it already?
-
-
-# CHECK IF THE TABLES HAVE RELATIONSHIPS CHILD-PARENT -> If you have a table that is part of a bigger table (a child table), and the child table's data is derived from the same data source as the parent table, you don't necessarily need to insert the child table in the table_sources dictionary separately. Instead, you can handle it within the code that populates the parent table (in this case, the "Publication" table) from the data source ("relational_publications.csv").
