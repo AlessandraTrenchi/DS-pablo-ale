@@ -223,16 +223,15 @@ class RelationalDataProcessor:
             self.db_connection.close()
 
     def uploadData(self, path: str) -> bool:
-        if not self.db_connection:
+        if not self.db_connection: #checks if the database connection is open
             if not self.openConnection():
                 return False
 
         try:
             # Depending on the file extension, call the appropriate data processing function
             if path.endswith(".json"):
-                extracted_data = self.parse_json(path)
-                # Perform the data upload operation here, you can use extracted_data as needed
-                # For example, you can insert the extracted data into your database tables.
+                extracted_data = self.parse_json(path) #calling parse.json function
+               
 
             elif path.endswith(".csv"):
                 self.parse_csv(path)
@@ -252,8 +251,8 @@ class RelationalProcessor(RelationalDataProcessor):
         super().__init__(db_connection)
         self.db_path = None  # Initialize db_path as None or set a default path
 
-    def getDbPath(self) -> str:
-        return self.db_path
+    def getDbPath(self) -> str: #retrieves the path and returns it as a string
+        return self.db_path 
 
     def setDbPath(self, path: str) -> bool:
         self.db_path = path

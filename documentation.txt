@@ -6,11 +6,17 @@ A relational database stores data in structured tables with rows and columns, al
 
 From DATA -> raw information that needs to be processed. relational_other_data.json, relational_publications.csv
 
-to a RELATIONAL DATA PROCESSOR -> preparing and trasforming data into a suitable format for storage in a relational database. parse.py
+to a RELATIONAL DATA PROCESSOR -> preparing and trasforming data into a suitable format for storage in a relational database. It is structured in a way to interact with a relational database: it can open a connection to the database, process data from files, and commit changes to the database. 
 
-RELATIONAL DATABASE -> stores data into tables with rows and columns, each having a specific data type and relationships with other tables. Data storage, integrity and retrieval. populate.py, main.py
+RELATIONAL PROCESSOR -> The RelationalProcessor class is an extension of the RelationalDataProcessor class, inheriting all the methods and properties of the parent class (connecting, uploading and processing). It adds two methods: getDbPath and setDbPath to access and modify the database file path.
 
 RELATIONAL QUERY PROCESSOR -> module of a relational database responsible for processing SQL queries. Functions: query planning, execution, interpretation and optimization to retrieve data efficiently from the relational database.
+
+TRIPLESTORE DATA PROCESSOR ->
+
+TRIPLESTORE PROCESSOR ->
+
+TRIPLESTORE QUERY PROCESSOR ->
 
 GENERIC QUERY PROCESSOR -> handles queries for different types of data stores (relational and graph database).
 
