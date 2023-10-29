@@ -1,231 +1,207 @@
-Data Processing and Querying Software Documentation
+# Relational Database Data Processing and Querying Software Documentation
 
-In this comprehensive guide, we will provide you with a detailed overview of our software solution designed to address the challenges of processing data stored in different formats and simultaneously querying two distinct types of databases: a Graph Database and a Relational Database.
+Welcome to the documentation for our Relational Database Data Processing and Querying Software. This comprehensive guide will provide you with an in-depth overview of our software solution designed to address the challenges of processing data stored in different formats and simultaneously querying two distinct types of databases: a Graph Database and a Relational Database.
 
-Relational Database Basics
+## Relational Database Basics
+
 A relational database is a structured way to store and manage data. It uses tables with rows and columns, making it ideal for organizing large volumes of data. SQL (Structured Query Language) is used to retrieve data from relational databases by specifying criteria to select, filter, and sort data. Relationships between different data sets are established using foreign keys and joins, and indexes are used to optimize query performance.
 
-From DATA -> raw information that needs to be processed. relational_other_data.json, relational_publications.csv
+### Data Flow
 
-to a RELATIONAL DATA PROCESSOR -> preparing and trasforming data into a suitable format for storage in a relational database. It is structured in a way to interact with a relational database: it can open a connection to the database, process data from files, and commit changes to the database. 
+1. **Data Source**: The raw information that needs to be processed, which can be in the form of files like `relational_other_data.json` and `relational_publications.csv`.
 
-RELATIONAL PROCESSOR -> The RelationalProcessor class is an extension of the RelationalDataProcessor class, inheriting all the methods and properties of the parent class (connecting, uploading and processing). It adds two methods: getDbPath and setDbPath to access and modify the database file path.
+2. **Relational Data Processor**: This component prepares and transforms data into a suitable format for storage in a relational database. It can open a connection to the database, process data from files, and commit changes to the database.
 
-RELATIONAL QUERY PROCESSOR -> module of a relational database responsible for processing SQL queries. Functions: query planning, execution, interpretation and optimization to retrieve data efficiently from the relational database.
+3. **Relational Processor**: The `RelationalProcessor` class is an extension of the `RelationalDataProcessor` class, inheriting all the methods and properties of the parent class (connecting, uploading, and processing). It adds two methods: `getDbPath` and `setDbPath` to access and modify the database file path.
 
-TRIPLESTORE DATA PROCESSOR ->  to upload data to an RDF triplestore.
+4. **Relational Query Processor**: This module of a relational database is responsible for processing SQL queries. It includes functions for query planning, execution, interpretation, and optimization to retrieve data efficiently from the relational database.
 
-TRIPLESTORE PROCESSOR -> for executing predefined queries on the triplestore.
+5. **Triplestore Data Processor**: This component allows you to upload data to an RDF triplestore.
 
-TRIPLESTORE QUERY PROCESSOR -> for managing the SPARQL endpoint URL.
+6. **Triplestore Processor**: It is responsible for executing predefined queries on the triplestore.
 
-GENERIC QUERY PROCESSOR -> handles queries for different types of data stores (relational and graph database). It combines and executse queries on both the relational database and RDF triplestore. It aggregates results from different query processors.
+7. **Triplestore Query Processor**: This component is for managing the SPARQL endpoint URL.
 
-PYTHON OBJECTS -> once the data is retrieved from the database or processed by a query processor it can be mapped to python objects for further application-level processing.
+8. **Generic Query Processor**: It handles queries for different types of data stores, including both relational and graph databases. It combines and executes queries on both the relational database and RDF triplestore, aggregating results from different query processors.
 
-Taking raw data, processing and structuring it in a relational database, querying the data (relational query processor), extending the capabilities with a generic query processor and representing the results as Python objects.
+9. **Python Objects**: Once the data is retrieved from the database or processed by a query processor, it can be mapped to Python objects for further application-level processing.
 
- 
-Project Overview:
+### Project Overview
+
 In today's data-driven world, organizations and individuals often find themselves dealing with data in various formats, ranging from structured CSV files to complex JSON documents. Managing and extracting valuable insights from this diverse data can be a complex task. Our software aims to simplify this process by offering a unified platform for data ingestion, processing, and querying, while accommodating both graph and relational databases.
 
-Objective:
+### Objective
+
 The primary objective of this project is to develop a robust and user-friendly software tool that enables users to:
 
-Ingest data from different formats: JSON and CSV.
-Store the processed data in two distinct types of databases:
-Graph Database: Managed by the Graph Data Processor and queried using the Graph Query Processor.
-Relational Database: Managed by the Relational Data Processor and queried using the Relational Query Processor.
-Query these databases simultaneously using predefined operations.
-Provide users with the ability to manipulate and query data using dataframes for additional flexibility.
+- Ingest data from different formats: JSON and CSV.
+- Store the processed data in two distinct types of databases:
+    - Graph Database: Managed by the Graph Data Processor and queried using the Graph Query Processor.
+    - Relational Database: Managed by the Relational Data Processor and queried using the Relational Query Processor.
+- Query these databases simultaneously using predefined operations.
+- Provide users with the ability to manipulate and query data using dataframes for additional flexibility.
 
-Building a Relational Database
-Now that we have stated the purpose of our software and the type of data it is the step of building a ERD: Entity-Relationship Diagram based on the UML provided by the Course of Data Science 2021/2022 by professor Silvio Peroni.
-This is the structure for the tables of my relational database:
+## Building a Relational Database
 
-Person:
-Attributes:
-givenName (string, required)
-familyName (string, required)
-Relationships:
-IdentifiableEntity (1-to-many)
+To create the structure for the tables of the relational database, we follow the Entity-Relationship Diagram (ERD) based on the UML provided by the Course of Data Science 2021/2022 by Professor Silvio Peroni. This is the structure for the tables of our relational database:
 
-Publication:
-Attributes:
-publicationYear (integer, optional)
-title (string, required)
-Relationships:
-cites (self-referencing, many-to-many)
-author (many-to-many with Person)
-publicationVenue (0 or 1-to-1 with Venue)
-IdentifiableEntity (1-to-1)
+### Person:
 
-Venue:
-Attributes:
-title (string, required)
-Relationships:
-organization (1-to-1 with Organization)
-IdentifiableEntity (1-to-1)
+- **Attributes:**
+    - givenName (string, required)
+    - familyName (string, required)
 
-Organization:
-Attributes:
-name (string, required)
-Relationships:
-publisher (1-to-1 with IdentifiableEntity)
+- **Relationships:**
+    - IdentifiableEntity (1-to-many)
 
-JournalArticle:
-Attributes:
-issue (string, optional)
-volume (string, optional)
-Relationships:
-Publication (1-to-1)
+### Publication:
 
-BookChapter:
-Attributes:
-chapterNumber (integer, required)
-Relationships:
-Publication (1-to-1)
+- **Attributes:**
+    - publicationYear (integer, optional)
+    - title (string, required)
 
-ProceedingsPaper:
-Relationships:
-Publication (1-to-1)
+- **Relationships:**
+    - cites (self-referencing, many-to-many)
+    - author (many-to-many with Person)
+    - publicationVenue (0 or 1-to-1 with Venue)
+    - IdentifiableEntity (1-to-1)
 
+### Venue:
 
-Relationships: Person to IdentifiableEntity:
+- **Attributes:**
+    - title (string, required)
 
-A person is associated with an identifiable entity through a 1-to-many relationship.
-Publication to IdentifiableEntity:
+- **Relationships:**
+    - organization (1-to-1 with Organization)
+    - IdentifiableEntity (1-to-1)
 
-Each publication is associated with an identifiable entity through a 1-to-1 relationship.
-Publication to Publication (cites):
+### Organization:
 
-Publications can have a many-to-many relationship with themselves (self-referencing) to represent citations.
-Publication to Person (author):
+- **Attributes:**
+    - name (string, required)
 
-Publications have a many-to-many relationship with persons to represent authors.
-Publication to Venue (publicationVenue):
+- **Relationships:**
+    - publisher (1-to-1 with IdentifiableEntity)
 
-Publications can be associated with a venue through a 0 or 1-to-1 relationship.
-Venue to Organization (organization):
+### JournalArticle:
 
-Venues are associated with organizations through a 1-to-1 relationship.
-Organization to IdentifiableEntity (publisher):
+- **Attributes:**
+    - issue (string, optional)
+    - volume (string, optional)
 
-Organizations are associated with identifiable entities through a 1-to-1 relationship.
+- **Relationships:**
+    - Publication (1-to-1)
 
-Adding methods to my classes in the Application code (outside of SQL) in order to retrieve and manipulate data from the database as shown in the UML model. 
-1. Define Classes in Python (corresponding to the UML model) -> methods.py
-2. Define the methods inside the classes
-When the method iis nside a list we declared it inside the _init_ function as an empty list and then executed it inside that specific method. Same thing goes for a set, which we declared as an empty one inside the _init_ function and then executed it in the specific method.
-For example to write the getIds() method in the IdentifiableEntity class, we created a list containing the id attribute and then returned it.
+### BookChapter:
 
-When the relationships between entities is purely logical (no attributes) we link the entities through methods. 
-When using an addSomething method, it is necessary to initialize the attribute as None in the constructor. This way, you can associate a publication with a venue using the addPublicationVenue method.
-Since Journal, Book and Proceeding are entities only representing relationships to the Venue entity and do not have any attribute we keeped them as placeholder classes indicating the relationship.
+- **Attributes:**
+    - chapterNumber (integer, required)
 
-#parser.py
-It is important to parse data from JSON and CSV files before populating the database.
-Parsing is the process of extracting structured data from the raw data files.
+- **Relationships:**
+    - Publication (1-to-1)
 
-The pandas library is utilized to parse CSV files. It reads the CSV file and loads it into a DataFrame, enabling structured data handling.
-# The structure of the CSV file is automatically understood, and values are separated into individual columns based on the delimiter (commonly a comma). Each row of the CSV file corresponds to a row in the DataFrame, and each attribute (column) is represented as a column in the DataFrame.
+### ProceedingsPaper:
 
+- **Relationships:**
+    - Publication (1-to-1)
 
-Function parse_csv 
-- Takes a CSV file path as input. 
-- Uses pandas library to read the CSV file and creates a DataFrame (df).
-- Prints a message indicating that CSV data is being processed.
-- Iterates through each row in the DataFrame using a 'for' loop with the 'iterrows()' method. 
-- For each row, it prints the row number, then it further iterates through its columns, printing the column names and their respective values.
+#### Relationships:
 
-Parsing JSON Data
-The script also handles the parsing of JSON data. 
-Since the JSON file contains complex hierarchical data with various sections (authors, venues, references and publishers) it extracts the nested dictionaries of each section.
+- **Person to IdentifiableEntity:**
+    - A person is associated with an identifiable entity through a 1-to-many relationship.
 
-parse_json(json_file)
- - Initialise extracted_data: a dictionary that will store the extracted data from different sections of the JSON file.
- - Open and load the JSON file into the 'data' variable.
- - Print a processing message to indicate that it started processing the JSON file.
- - Extract the 'authors' section in the JSON data, by iterating through each DOI and the associated list of authors, extracting information "family", "given" and "orcid" for each author.
- - The extracted author data is then stored as dictionaries in the Authors list inside the extracted_data dictionary.
- 
+- **Publication to IdentifiableEntity:**
+    - Each publication is associated with an identifiable entity through a 1-to-1 relationship.
+
+- **Publication to Publication (cites):**
+    - Publications can have a many-to-many relationship with themselves (self-referencing) to represent citations.
+
+- **Publication to Person (author):**
+    - Publications have a many-to-many relationship with persons to represent authors.
+
+- **Publication to Venue (publicationVenue):**
+    - Publications can be associated with a venue through a 0 or 1-to-1 relationship.
+
+- **Venue to Organization (organization):**
+    - Venues are associated with organizations through a 1-to-1 relationship.
+
+- **Organization to IdentifiableEntity (publisher):**
+    - Organizations are associated with identifiable entities through a 1-to-1 relationship.
+
+### Adding Methods
+
+To manipulate and retrieve data from the database as shown in the UML model, you need to define classes in Python corresponding to the UML model and implement methods inside those classes. The `methods.py` file contains these methods. When the relationships between entities are purely logical (no attributes), you link the entities through methods. For example, you can use an `addSomething` method to associate a publication with a venue. This method initializes the attribute as `None` in the constructor and associates it within the specific method. 
+
+# Parser
+
+Parsing is a crucial step to extract structured data from raw data files. We use the Pandas library to parse CSV files. The structure of the CSV file is automatically understood, and values are separated into individual columns based on the delimiter (commonly a comma). Each row of the CSV file corresponds to a row in the DataFrame, and each attribute (column) is represented as a column in the DataFrame.
+
+## Parsing CSV Data
+
+The `parse_csv` function performs the following steps:
+
+- Takes a CSV file path as input.
+- Uses the Pandas library to read the CSV file and creates a DataFrame (`df`).
+- Prints a message indicating that CSV data is being
+
+ processed.
+- Iterates through each row in the DataFrame using a 'for' loop with the 'iterrows()' method.
+- For each row, it prints the row number and iterates through its columns, printing the column names and their respective values.
+
+## Parsing JSON Data
+
+The script also handles the parsing of JSON data. Since the JSON file contains complex hierarchical data with various sections (authors, venues, references, and publishers), it extracts the nested dictionaries of each section.
+
+The `parse_json` function performs the following steps:
+
+- Initializes `extracted_data`, a dictionary that will store the extracted data from different sections of the JSON file.
+- Opens and loads the JSON file into the 'data' variable.
+- Prints a processing message to indicate that it started processing the JSON file.
+- Extracts the 'authors' section in the JSON data by iterating through each DOI and the associated list of authors, extracting information such as "family," "given," and "orcid" for each author.
+- The extracted author data is then stored as dictionaries in the 'Authors' list inside the 'extracted_data' dictionary.
+
 In summary, the code treats CSV and JSON data differently because of their distinct formats. CSV data is read into a DataFrame and iterated row by row, while JSON data is parsed with nested loops to extract specific sections of data. The code provides flexibility to handle and extract data from both formats based on their unique characteristics.
 
- Processing "authors" Section
-- Checks for the existence of an "authors" section in the JSON data.
-- If found, a new entry is created in the 'extracted_data' dictionary (initially empty).
-- For each DOI, the author's list is retrieved and associated with the corresponding DOI.
-- An empty list is initialized for each DOI in the "authors" section of 'extracted_data'. extracted_data["authors"][doi] = []
-- Iterates through the author list for each DOI, checking if each 'author_info' is a dictionary.
-- If 'author_info' is a dictionary, it is appended to the list associated with the corresponding DOI. This allows the collection of author information for each DOI in a list under the "authors" section of 'extracted_data'.
+# Populating the Database
 
-This script facilitates the parsing of both CSV and JSON data, making it ready for database population. It's a critical preprocessing step to ensure that data is structured and organized for further use.
+After parsing the data, the code populates an SQLite database. The code defines several functions to insert data into the tables of the database. 
 
+In the previous approach, individual functions were developed for each table in the database, resulting in code duplication and labor-intensive maintenance. In the updated approach, there is a more efficient way of inserting data into tables because there is a single generic insert function called `insert_data`. This function is capable of inserting data into any table in the database.
 
+- `insert_data`: A generic function for inserting data into SQL tables. It takes as input a cursor (the SQLite cursor object for executing SQL queries), a table_name (name of the target table), and data (a dictionary containing column names and values). This function dynamically constructs INSERT statements based on the provided table names and data.
 
+- `insert_data_from_csv`: A function for inserting data from a CSV file into an SQLite table. It opens the CSV file, reads its contents using a csv.DictReader, and inserts each row as a dictionary into the specified table using the `insert_data` function.
 
-POPULATING THE DATABASE
+- `insert_data_from_json`: A function for inserting data from a JSON source into an SQLite table. It takes three arguments: cursor, table_name, and json_data (a list of dictionaries containing the data). The function iterates through the JSON data and calls the `insert_data` function to populate the target table.
 
-After having imported the necessary libraries, the code defines several functions to insert data into the tables of a SQLite database.
+These functions are called within the `main.py` file, where the primary logic for managing the relational database is executed. The main function handles opening a database connection, enabling constraints, defining the tables and the data sources, iterating through the tables and data sources, handling potential errors, committing changes, and closing the database connection.
 
-In the previous approach individual functions were developed for each table in the database, such as insert_publishers, insert_event ... each was responsible for inserting data into its respective table resulting in code duplication and labor-intensive maintenance.
+The type of entities' relationships are described in detail, including parent tables and child tables, and PRAGMA foreign keys is used to enforce these rules.
 
-In the updated approach there is a more efficient way of inserting data into tables because there is a single generic insert function called insert_data. This function is capable of inserting data into any table in the database.
+Within the `main` function, the database connection is opened using the `open_database_connection` function, data insertion is performed, and then the connection is closed using the `close_database_connection` function. This ensures proper connection management.
 
-insert_data is a generic function for inserting data into SQL tables, it takes as input cursor - the SQLite cursor object for executing SQL queries-, table_name (name of the target table), data -dictionary containing column names, values. This function dynamically constructs INSERT statements based on the provided table names and data.
+# Implementation
 
-insert_data_from_csv is a function for inserting data from a CSV file into an SQLite table. It opens the CSV file, reads its contents using a csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
+The `impl.py` file integrates `populate.py` and `main.py` to create a more efficient approach for populating the SQLite database. It introduces two essential classes: `RelationalDataProcessor` and `RelationalProcessor`.
 
-Similarly insert_data_from_json is a function for inserting data from a JSON source into an SQLite table. It takes 3 arguments: cursor, table_name and json_data - a list of dictionaries containing the data. The function iterates through the JSON data and for each dictionary item in the list calls the insert_data function to populate the target table.
+- `RelationalDataProcessor`: This class is designed to handle data-related operations specific to a relational database. Its purpose is to upload data to the database through the `uploadData` method, which takes a data file path and attempts to upload the data to the specified database. It ensures that the data is correctly processed and inserted in the database.
 
-These functions are now called within main.py, where the primary logic for managing the relational database is executed.
+- `RelationalProcessor`: This class manages the database connection and settings. It provides a single point of access to set (`setDbPath`) and retrieve (`getDbPath`) the database path.
 
-# main.py
+- `insert_data` function: This is a generic function defined in the `RelationalProcessor` class, capable of inserting data into any table of the database. It dynamically constructs SQL INSERT statements based on the provided table names and data.
 
-In main.py there is the main logic of the database:
-1. opening a database connection.
-2. enabling constraints. Foreign key constraints are rules that enforce referential integrity in a relational database. 
-3. define the tables and the data sources as a dictionary
-4. iterate through the tables and data sources calling the functions from populate.py
-5. handle potential errors.
-6. commit changes.
-7. close the database connection.
+- `insert_data_from_csv` function: This function is for inserting data from a CSV file into an SQLite table. It opens the CSV file, reads its contents using `csv.DictReader`, and inserts each row as a dictionary into the specified table using the `insert_data` function.
 
-Type of entities relationships' -> parent table, child table (table that contains the foreign key). 
-PRAGMA foreign_keys = enforces these rules.
-Within the main function, you open the database connection using the open_database_connection function, perform data insertion, and then close the connection using the close_database_connection function. This ensures proper connection management.
+- `insert_data_from_json` method: This method reads data from a JSON file, dynamically constructs SQL queries, inserts the data into the specified table, and handles errors gracefully. The method has three parameters: `table_name` (the name of the target table), `json_file` (the path to the JSON source file), and `self` (the instance of the `RelationalProcessor` class).
 
-#methods.py
+The `insert_data_from_json` method follows a sequence of steps to insert JSON data into the database and handles exceptions to ensure data integrity.
 
-MAYBE IN METHODS DIVIDE BASED ON THE NAME OF THE PROCESSOR, SO MORE MODULARITY
+Overall, this script facilitates the parsing of both CSV and JSON data, making it ready for database population. It's a critical preprocessing step to ensure that data is structured and organized for further use.
 
+# Triplestore Data Processor
 
+The `TriplestoreDataProcessor` class is designed to interact with a triplestore by uploading, querying, and managing data in a semantic triple format. This class provides various methods to work with RDF data. It has attributes for specifying the SPARQL endpoint URL, base URI, custom base URI, and a mapping between CSV column names and RDF URIs.
 
-#impl.py
+---
 
-I have integrated populate.py and main.py into impl.py to create a more efficient approach for populating my SQLite database.
-
-RelationalDataProcessor Class -> designed to handle data-related operations specific to a relational dataabase. It has the purpose of uploading data to the database through the 'uploadData' method which takes a data file path and attempts to upload the data to the specified database. It ensures that the data is correctly processed and inserted in the database.
-
-RelationalProcessor Class -> manages the database connection and settings. It provides a single point of access to set (setDbPath) and retrieve (getDbPath) the database path. 
-
-insert_data Function: generic function defined in RelationalProcessor class, capable of inserting data into any table of the database. It dynamically constructs SQL INSERT statements based on the provided table names and data.
-
-A function named insert_data_from_csv is defined in the RelationalProcessor class. It opens a CSV file, reads its contents using csv.DictReader, and inserts each row as a dictionary into the specified table using the insert_data function.
-
-The insert_from_json method the insert_data_from_json method reads data from a JSON file, dynamically constructs SQL queries, inserts the data into the specified table, and handles errors gracefully. The method has three parameters: table_name (the name of the target table), json_file (the path to the JSON source file), and self (the instance of the RelationalProcessor class).
-- It starts by performing some input validation to ensure that the necessary data is provided. If the database path is not set or if the JSON file does not exist, it returns False to indicate that the operation failed.
-- It establishes a connection to the SQLite database. This is done using the sqlite3.connect method and creating a cursor for executing SQL queries.
-- The method opens the JSON file using with open(json_file, 'r') as json_file and reads the content into a Python data structure using json.load(json_file). This results in a list of dictionaries, where each dictionary represents a row of data to be inserted into the table.
-- It then iterates through each dictionary item in the list, which represents a row of data.
-- For each item, it constructs an SQL INSERT query dynamically based on the table name and the keys in the dictionary (which correspond to column names).
-- It generates placeholders for the values using placeholders = ', '.join(['?'] * len(item)), creating as many placeholders as there are values in the row.
-- The query variable is constructed with the INSERT statement to insert the data into the specified table. It includes the column names and placeholders for the values.
-- It then executes the query with the data values using cursor.execute(query, list(item.values())). This inserts the data from the dictionary into the table.
-- After all data has been inserted, the method calls conn.commit() to commit the changes to the database.
-- If an exception occurs during this process, the method catches it, prints an error message, and returns False to indicate that the operation failed. If all goes well, it returns True to indicate that the data insertion was successful.
-
-
-
-
-
+With this restructured documentation, readers can follow a logical flow, starting with an understanding of the software's purpose and the basics of relational databases, then delving into data processing, database population, and triplestore interaction. Each section is clearly defined, and the role of specific classes and functions in the software is well-documented.
