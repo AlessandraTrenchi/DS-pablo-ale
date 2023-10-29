@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[12]:
-
-
 # Import necessary libraries
 import pandas as pd
 import json
@@ -40,11 +34,9 @@ predicate_map = {
     'event': 'http://schema.org/event',
 
     # Venue
+    'venues_id': 'http://schema.org/isPartOf',  # Updated line
     'venue_type': 'http://schema.org/additionalType',
     'publisher': 'http://schema.org/publisher',
-
-    # Organization (Publisher)
-    # The 'name' attribute for Organization (publisher) can use the same 'http://schema.org/name' IRI as used for title, but it might need a different key in the map if used differently in the code.
     
     # Person
     'family': 'http://schema.org/familyName',
@@ -62,6 +54,7 @@ type_map = {
 class GraphDataProcessor:
     def __init__(self):
         self.endpointUrl = "http://localhost:9999/blazegraph/sparql"
+        self.sparql = SPARQLWrapper(self.endpointUrl)  
         self.base_uri = "http://schema.org/"
         self.custom_base_uri = "https://github.com/AlessandraTrenchi/DS-pablo-ale/relationaldb/"
 
@@ -114,40 +107,60 @@ class GraphDataProcessor:
 
         # Generate and return triples
         return self.generateTriples()  # Return triples
+
+
+    #save triples to a text file
+    def saveTriplesToFile(self, triples, filename):
+        """
+        Save triples to a text file.
         
+        Parameters:
+        - triples: List of triples to be saved.
+        - filename: Name of the file where triples will be saved.
+        """
+        with open(filename, 'w') as f:
+            for triple in triples:
+                f.write(f"{triple}\n")
+        print(f"Saved {len(triples)} triples to {filename}.")
+    
     def generateTriples(self):
         """
-        Generate triples from the merged DataFrame.
-        
-        Triples structure:
-            Subject: ID column formatted as a URI
-            Predicate: Mapped from predicate_map or custom_base_uri + column name
-            Object: The value in the respective column
+        Generate triples from the merged DataFrame in N-Triples format.
         """
         # Check if merged DataFrame exists
         if self.merged_df is None:
             print("Error: No merged DataFrame found.")
             return None
-
+    
         # Initialize list to store triples
         triples = []
-
+    
         for index, row in self.merged_df.iterrows():
             subject = format_doi_as_uri(row['id'].replace(":", "_"))
             for col in self.merged_df.columns:
                 predicate = predicate_map.get(col, self.custom_base_uri + col)
                 object_ = row[col]
                 if pd.notna(object_):  # Check if object is not NaN
-                    # Decide the formatting based on the column type
-                    if col in ["venues_id", "id", "type"]:  # We assume venues_id, id, and type are URIs
-                        triples.append((subject, predicate, f"<{object_}>"))
+                    # Check if the object has multiple comma-separated values
+                    if isinstance(object_, str) and ',' in object_:
+                        for single_object in object_.split(','):
+                            single_object = single_object.strip()  # Remove any leading/trailing whitespace
+                            triples.append(f"<{subject}> <{predicate}> \"{single_object}\" .")
                     else:
-                        triples.append((subject, predicate, f"\"{object_}\""))
-                        
+                        # Decide the formatting based on the column type
+                        if col in ["venues_id", "id", "type"]:  # We assume venues_id, id, and type are URIs
+                            triples.append(f"<{subject}> <{predicate}> <{object_}> .")
+                        else:
+                            triples.append(f"<{subject}> <{predicate}> \"{object_}\" .")
+    
         print(f"Generated {len(triples)} triples.")
+    
+        # Write the triples to a file in N-Triples format
+        with open('triples.nt', 'w') as f:
+            for triple in triples:
+                f.write(f"{triple}\n")
+    
         return triples
-        
-
 
 
 # GraphDatabase Class
@@ -166,15 +179,13 @@ class GraphDatabase:
         # Create the SPARQL update query for inserting triples
         print("Uploading triples to Blazegraph...")
         insert_query = "INSERT DATA { GRAPH <https://github.com/AlessandraTrenchi/DS-pablo-ale/relationaldb/> { "
+        
+        for triple in triples:
+            # Since the triples are already in N-Triples format, you can directly append them
+            insert_query += f"{triple} "
     
-        for s, p, o in triples:
-            if o.startswith("http:") or o.startswith("\""):  # Check if object is a URI or literal directly
-                insert_query += f"<{s}> <{p}> {o} . "
-            else:
-                insert_query += f"<{s}> <{p}> \"{o}\" . "
-
         insert_query += " } }"
-    
+        
         # Execute the SPARQL update query
         self.sparql.setQuery(insert_query)
         self.sparql.query()
@@ -213,8 +224,10 @@ class GraphQueryProcessor:
         self.sparql.setReturnFormat(JSON) 
 
     def execute_query(self, query):
+        print(f"Executing query: {query}")  # Debug print
         self.sparql.setQuery(query)
         results = self.sparql.query().convert()
+        print(f"Raw result: {results}")
         return results
 
     def getPublicationsPublishedInYear(self, year):
@@ -266,86 +279,113 @@ class GraphQueryProcessor:
         return query
 
     
-    def getPublicationInVenue(self, venue_id):
+    def getPublicationInVenue(self, venue_name):
         query = f"""
         PREFIX schema: <http://schema.org/>
-        SELECT ?publication ?title WHERE {{
-            ?publication schema:isPartOf <{venue_id}> .
-            ?publication schema:name ?title .
+        SELECT ?publication WHERE {{
+            ?publication schema:isPartOf ?venue .
+            FILTER (str(?venue) = "{venue_name}")
         }}
         """
         results = self.execute_query(query)
-        publications = [{"publication": result["publication"]["value"], "title": result["title"]["value"]} for result in results["results"]["bindings"]]
-        return pd.DataFrame(publications) 
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
 
     
-    def getJournalArticlesInIssue(issue, volume, journal_id):
+
+    def getJournalArticlesInIssue(self, journal_id, volume, issue):
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT ?article WHERE {{
-            ?article :type "journal-article" .
-            ?article :issue "{issue}" .
-            ?article :volume "{volume}" .
-            ?article :publication_venue "{journal_id}" .
+            ?article schema:isPartOf ?journal .
+            ?article schema:volumeNumber "{volume}" .
+            ?article schema:issueNumber "{issue}" .
+            FILTER (strstarts(str(?journal), "issn:") || str(?journal) = "{journal_id}")
         }}
         """
-        return query
+        results = self.execute_query(query)
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
+
+
     
-    def getJournalArticlesInVolume(volume, journal_id):
+    def getJournalArticlesInVolume(self, journal_id, volume):
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT ?article WHERE {{
-            ?article :type "journal-article" .
-            ?article :volume "{volume}" .
-            ?article :publication_venue "{journal_id}" .
+            ?article schema:isPartOf ?journal .
+            ?article schema:volumeNumber "{volume}" .
+            FILTER (strstarts(str(?journal), "issn:") || str(?journal) = "{journal_id}")
         }}
         """
-        return query
-    
-    def getJournalArticlesInJournal(journal_id):
+        results = self.execute_query(query)
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
+
+        
+    def getJournalArticlesInJournal(self, journal_id):
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT ?article WHERE {{
-            ?article :type "journal-article" .
-            ?article :publication_venue "{journal_id}" .
+            ?article schema:isPartOf ?journal .
+            FILTER (strstarts(str(?journal), "issn:") || str(?journal) = "{journal_id}")
         }}
         """
-        return query
+        results = self.execute_query(query)
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
     
-    def getProceedingsByEvent(event_name):
+    def getProceedingsByEvent(self, event_name):
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT ?proceeding WHERE {{
-            ?proceeding :type "proceeding" .
-            ?proceeding :event ?event .
-            FILTER(contains(lcase(str(?event)), "{event_name.lower()}"))
+            ?proceeding a schema:ScholarlyArticle .
+            ?proceeding schema:isPartOf ?event .
+            FILTER (regex(str(?event), "{event_name}", "i"))
         }}
         """
-        return query
+        results = self.execute_query(query)
+        return results
     
-    def getPublicationAuthors(publication_id):
+    def getPublicationAuthors(self, publication_id):
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT ?author WHERE {{
-            ?publication :id "{publication_id}" .
-            ?publication :authors ?author .
+            <{publication_id}> schema:author ?author .
         }}
         """
-        return query
+        results = self.execute_query(query)
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
     
-    def getPublicationsByAuthorName(author_name):
+    def getPublicationsByAuthorName(self, author_name):
         query = f"""
-        SELECT ?publication WHERE {{
-            ?publication :authors ?author .
-            FILTER(contains(lcase(str(?author)), "{author_name.lower()}"))
+        PREFIX schema: <http://schema.org/>
+        SELECT ?article ?title WHERE {{
+            ?article schema:author ?author .
+            ?article schema:name ?title .
+            FILTER (regex(str(?author), "{author_name}", "i"))
         }}
         """
-        return query
+        results = self.execute_query(query)
+        # Convert the results to a DataFrame or whatever format you prefer
+        return results
+
     
-    def getDistinctPublisherOfPublications(publication_ids):
+    def getDistinctPublisherOfPublications(self, doi_list):
+        # Modify this line to include angle brackets around each DOI
+        doi_str = ', '.join([f'<{doi}>' for doi in doi_list])
         query = f"""
+        PREFIX schema: <http://schema.org/>
         SELECT DISTINCT ?publisher WHERE {{
-            ?publication :id ?id .
-            ?publication :publisher ?publisher .
-            FILTER(?id IN ({','.join([f'"{pid}"' for pid in publication_ids])}))
+            ?article schema:identifier ?doi .
+            ?article schema:publisher ?publisher .
+            FILTER (?doi IN ({doi_str}))
         }}
         """
-        return query
+        results = self.execute_query(query)
+        return results
+
 
     def getAllPublications(self):
         query = """
@@ -362,6 +402,32 @@ class GraphQueryProcessor:
         query = "SELECT * WHERE { ?s ?p ?o } LIMIT 5"
         results = self.execute_query(query)
         print(results)
+
+    def getISSNOfArticle(self, article_uri):
+        query = f"""
+        PREFIX schema: <http://schema.org/>
+        SELECT ?issn WHERE {{
+            <{article_uri}> schema:isPartOf ?journal .
+            ?journal schema:issn ?issn .
+        }}
+        """
+        results = self.execute_query(query)
+        # Extract the ISSN from the results
+        if results and 'bindings' in results['results'] and len(results['results']['bindings']) > 0:
+            return results['results']['bindings'][0]['issn']['value']
+        else:
+            return None
+
+    def getArticleDetails(self, article_uri):
+        query = f"""
+        PREFIX schema: <http://schema.org/>
+        SELECT ?predicate ?object WHERE {{
+            <{article_uri}> ?predicate ?object .
+        }}
+        """
+        results = self.execute_query(query)
+        return results
+
         
 # Example usage
 if __name__ == "__main__":
@@ -391,7 +457,9 @@ if __name__ == "__main__":
     csv_path = "/Users/juanpablocasadobissone/Downloads/graph_publications.csv"
     json_path = "/Users/juanpablocasadobissone/Downloads/graph_other_data copy.json"
     triples = graph_data_processor.uploadData(csv_path, json_path)
-    
+    if triples:
+        graph_data_processor.saveTriplesToFile(triples, '/Users/juanpablocasadobissone/Downloads/data/triples.txt')  # save to a text file
+
     if triples is not None:
         print("Uploading triples to database...")
         graph_db.upload_triples_to_blazegraph(triples)
@@ -418,27 +486,63 @@ if __name__ == "__main__":
     # Testing getVenuesByPublisherId
     print("Testing getVenuesByPublisherId...")
     publisher_id_to_query = "crossref:297"
-    
-    # Call the method to get the query
     sparql_query = graph_query_processor.getVenuesByPublisherId(publisher_id_to_query)
-    
-    # Execute the query
-    #venues = graph_query_processor.execute_query(sparql_query)
-    #print(f"Venues by publisher {publisher_id_to_query}: {venues}")
+
 
     # Testing getPublicationInVenue
     print("Testing getPublicationInVenue...")
-    venue_id_to_query = "issn:0944-1344"  # Replace this with the venue ID you want to test
+    venue_name_to_query = "Applied Sciences"  # Replace this with the venue name you want to test
     
-    # Call the method to get the DataFrame
-    df_publications = graph_query_processor.getPublicationInVenue(venue_id_to_query)
+    # Existing line to call the method and get the DataFrame
+    df_publications = graph_query_processor.getPublicationInVenue(venue_name_to_query)
     
-    print(f"Publications in venue {venue_id_to_query}:")
+    # Existing line to print the DataFrame
+    print(f"Publications in venue {venue_name_to_query}:")
     print(df_publications)
 
+    # Testing getJournalArticlesInIssue
+    print("Testing getJournalArticlesInIssue...")
+    df_articles_issue = graph_query_processor.getJournalArticlesInIssue("issn:0219-1377", "55", "3")
+    print(f"Articles in volume 55, issue 3:")
+    print(df_articles_issue)
+    
+    # Testing getJournalArticlesInVolume
+    print("Testing getJournalArticlesInVolume...")
+    df_articles_volume = graph_query_processor.getJournalArticlesInVolume("issn:1570-8268", "70")
+    print(f"Articles in volume 70:")
+    print(df_articles_volume)
 
-# In[ ]:
+    # Testing getJournalArticlesInVolume
+    print("Testing getJournalArticlesInVolume...")
+    df_articles_volume = graph_query_processor.getJournalArticlesInVolume("issn:1942-4787", "11")
+    print(f"Articles in volume 11:")
+    print(df_articles_volume)
 
+    # Test getJournalArticlesInJournal
+    print("Testing getJournalArticlesInJournal...")
+    df_articles_journal = graph_query_processor.getJournalArticlesInJournal("Acm Computing Surveys")
+    print(f"Articles in journal Acm Computing Surveys:")
+    print(df_articles_journal)
 
+    # Test getProceedingsByEvent
+    print("Testing getProceedingsByEvent...")
+    df_proceedings_event = graph_query_processor.getProceedingsByEvent("web")
+    print(f"Proceedings related to 'web':")
+    print(df_proceedings_event)
+    
+    # Test getPublicationAuthors
+    print("Testing getPublicationAuthors...")
+    df_pub_authors = graph_query_processor.getPublicationAuthors("http://dx.doi.org/doi_10.1017/s0021859619000820")
+    print(f"Authors of the publication:")
+    print(df_pub_authors)
 
+    print("Testing getPublicationsByAuthorName...")
+    df_publications_author = graph_query_processor.getPublicationsByAuthorName("Diefenbach")
+    print(f"Publications by author name partially matching 'Diefenbach':")
+    print(df_publications_author)
 
+    # Testing getDistinctPublisherOfPublications
+    print("Testing getDistinctPublisherOfPublications...")
+    df_publishers = graph_query_processor.getDistinctPublisherOfPublications(["doi:10.1007/978-3-030-00461-3_6"])
+    print(f"Distinct publishers of specified publications:")
+    print(df_publishers)
