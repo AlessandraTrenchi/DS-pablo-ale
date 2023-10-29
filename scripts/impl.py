@@ -409,10 +409,11 @@ def parse_json(json_file):
 
 
     # Handle the "authors" section 
-    if "authors" in data: #checs if the section exists in the loaded JSON
+    #items: DOI + authors info
+    if "authors" in data: #checs if the section exists in the loaded JSON dictionary
         authors_data = data["authors"] #retrieves the section and assigns it
-        for doi, authors_list in authors_data.items():
-            for author_info in authors_list:
+        for doi, authors_list in authors_data.items(): # iterates through the items
+            for author_info in authors_list: #for each author print author info
                 if isinstance(author_info, dict):
                     extracted_author = {
                         "DOI": doi,
@@ -467,10 +468,10 @@ def parse_json(json_file):
     return extracted_data
 
 def main():
-    json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
+    json_file = 'data/relational_other_data.json' #specifies the paths
     csv_file = 'data/relational_publications.csv'
-    extracted_data = parse_json(json_file)
-    parse_csv(csv_file)
+    extracted_data = parse_json(json_file) #calls the function to extract the data
+    parse_csv(csv_file) #process the csv file
     print("Extracted Authors Data:")
     for author in extracted_data["Authors"]:
         print(author)
@@ -490,7 +491,7 @@ def main():
 
 # Example usage of the functions
 if __name__ == "__main__":
-    json_file = 'data/relational_other_data.json'  # Replace with your JSON file's path
+    json_file = 'data/relational_other_data.json'  
     csv_file = 'data/relational_publications.csv'
     # Parse JSON data and extract authors, venues, references, and publishers
     extracted_data = parse_json(json_file)
@@ -516,13 +517,12 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main":
-    # Create an instance of RelationalDataProcessor
-    data_processor = RelationalDataProcessor()
+    # Create an instance of RelationalDataProcessor called data_processor
+    data_processor = RelationalDataProcessor() 
     data_processor.setDbPath("./pabloale.db")  # Setting the database path
     # Use data_processor for data processing with RelationalDataProcessor methods
-
     # Create an instance of RelationalQueryProcessor
-    query_processor = RelationalQueryProcessor(data_processor.db_connection)  # Pass the database connection from the data_processor
+    query_processor = RelationalQueryProcessor(data_processor.db_connection)  
     # Use query_processor for data querying with RelationalQueryProcessor methods
 
     # Create an instance of RelationalProcessor
@@ -556,7 +556,7 @@ if __name__ == "__main":
 
     # Query example: Get publications published in 2022
     publications_2022 = query_processor.getPublicationPublishedInYear(2022)
-    if not publications_2022.empty:
+    if not publications_2022.empty: #check if that dataframe is not empty
         print("Publications published in 2022:")
         print(publications_2022)
 # Close the database connection
