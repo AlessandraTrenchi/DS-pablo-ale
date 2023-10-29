@@ -239,8 +239,10 @@ class GraphQueryProcessor:
         """
         results = self.execute_query(query)
         publications = [result["publication"]["value"] for result in results["results"]["bindings"]]
-        return publications
-
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Publication": publications})
+        return df
 
     def getMostCitedPublication(self):
         query = f"""
@@ -251,10 +253,15 @@ class GraphQueryProcessor:
         """
         results = self.execute_query(query)
         if results["results"]["bindings"]:
-            return results["results"]["bindings"][0]["publication"]["value"]
+            publication = results["results"]["bindings"][0]["publication"]["value"]
+            citationCount = int(results["results"]["bindings"][0]["citationCount"]["value"])
         else:
             return None
-    
+        
+        # Convert the result to a DataFrame
+        df = pd.DataFrame({"Publication": [publication], "CitationCount": [citationCount]})
+        return df
+
     def getMostCitedVenue(self):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -265,9 +272,14 @@ class GraphQueryProcessor:
         """
         results = self.execute_query(query)
         if results["results"]["bindings"]:
-            return results["results"]["bindings"][0]["venue"]["value"]
+            venue = results["results"]["bindings"][0]["venue"]["value"]
+            citationCount = int(results["results"]["bindings"][0]["citationCount"]["value"])
         else:
             return None
+        
+        # Convert the result to a DataFrame
+        df = pd.DataFrame({"Venue": [venue], "CitationCount": [citationCount]})
+        return df
 
     def getVenuesByPublisherId(self, publisher_id):
         query = f"""
@@ -276,9 +288,12 @@ class GraphQueryProcessor:
             ?venue schema:publisher "{publisher_id}" .
         }}
         """
-        return query
+        results = self.execute_query(query)
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Venue": [result["venue"]["value"] for result in results["results"]["bindings"]]})
+        return df
 
-    
     def getPublicationInVenue(self, venue_name):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -288,10 +303,10 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
-
-    
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Publication": [result["publication"]["value"] for result in results["results"]["bindings"]]})
+        return df
 
     def getJournalArticlesInIssue(self, journal_id, volume, issue):
         query = f"""
@@ -304,11 +319,11 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Article": [result["article"]["value"] for result in results["results"]["bindings"]]})
+        return df
 
-
-    
     def getJournalArticlesInVolume(self, journal_id, volume):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -319,10 +334,11 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
-
         
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Article": [result["article"]["value"] for result in results["results"]["bindings"]]})
+        return df
+
     def getJournalArticlesInJournal(self, journal_id):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -332,9 +348,11 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
-    
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Article": [result["article"]["value"] for result in results["results"]["bindings"]]})
+        return df
+
     def getProceedingsByEvent(self, event_name):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -345,8 +363,11 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        return results
-    
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Proceeding": [result["proceeding"]["value"] for result in results["results"]["bindings"]]})
+        return df
+
     def getPublicationAuthors(self, publication_id):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -355,9 +376,11 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
-    
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Author": [result["author"]["value"] for result in results["results"]["bindings"]]})
+        return df
+
     def getPublicationsByAuthorName(self, author_name):
         query = f"""
         PREFIX schema: <http://schema.org/>
@@ -368,10 +391,12 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        # Convert the results to a DataFrame or whatever format you prefer
-        return results
+        
+        # Convert the results to a DataFrame
+        df = pd.DataFrame({"Article": [result["article"]["value"] for result in results["results"]["bindings"]],
+                            "Title": [result["title"]["value"] for result in results["results"]["bindings"]]})
+        return df
 
-    
     def getDistinctPublisherOfPublications(self, doi_list):
         # Modify this line to include angle brackets around each DOI
         doi_str = ', '.join([f'<{doi}>' for doi in doi_list])
@@ -384,8 +409,6 @@ class GraphQueryProcessor:
         }}
         """
         results = self.execute_query(query)
-        return results
-
 
     def getAllPublications(self):
         query = """
