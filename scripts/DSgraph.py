@@ -477,8 +477,8 @@ if __name__ == "__main__":
 
     # Upload data and get triples
     print("Uploading data and generating triples...")
-    csv_path = "/Users/juanpablocasadobissone/Downloads/graph_publications.csv"
-    json_path = "/Users/juanpablocasadobissone/Downloads/graph_other_data copy.json"
+    csv_path = "data/graph_publications.csv"
+    json_path = "data/graph_other_data copy.json"
     triples = graph_data_processor.uploadData(csv_path, json_path)
     if triples:
         graph_data_processor.saveTriplesToFile(triples, '/Users/juanpablocasadobissone/Downloads/data/triples.txt')  # save to a text file

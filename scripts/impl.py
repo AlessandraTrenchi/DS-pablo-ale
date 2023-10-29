@@ -379,7 +379,6 @@ class RelationalProcessor(RelationalQueryProcessor):
         self.db_path = None  # Initialize db_path as None or set a default path
         
         def getDbPath(self) -> str:
-        # Implement the method to get the database path
         # Return the path as a string
           return self.db_path
         
@@ -396,21 +395,22 @@ def parse_csv(csv_file):
     for index, row in df.iterrows():
         print(f'CSV Row {index + 1}:')
         for column, value in row.items():
-            print(f'{column}: {value}')
+            print(f'{column}: {value}') #this loop prints each column with its value for thew current row
 
 def parse_json(json_file):
     # Function to parse JSON data and extract authors, venues, references, and publishers
+    #initializing a dictionary with 4 empty lists
     extracted_data = {"Authors": [], "Venues": [], "References": [], "Publishers": []}  # Initialize lists to store extracted data
 
-    with open(json_file, 'r') as json_data:
-        data = json.load(json_data)
+    with open(json_file, 'r') as json_data: #opens json file in read mode
+        data = json.load(json_data) #json parsed and converted in to a py data structure
 
     print("Processing JSON Data:")
 
 
-    # Handle the "authors" section if it exists
-    if "authors" in data:
-        authors_data = data["authors"]
+    # Handle the "authors" section 
+    if "authors" in data: #checs if the section exists in the loaded JSON
+        authors_data = data["authors"] #retrieves the section and assigns it
         for doi, authors_list in authors_data.items():
             for author_info in authors_list:
                 if isinstance(author_info, dict):
