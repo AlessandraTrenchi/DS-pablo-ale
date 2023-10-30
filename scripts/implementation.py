@@ -53,28 +53,31 @@ class RelationalDataProcessor:
         with open(json_file, 'r') as f:
             data_json = json.load(f)
         
-        # Step 2: Merge Data
-        for doi, authors in data_json['authors'].items():
+        # Step 2: Merge Data into pandas df_csv
+        for doi, authors in data_json['authors'].items(): #starts the iteration through the items (key-value pairs)
             author_str = ', '.join([f"{a['given']} {a['family']} ({a['orcid']})" for a in authors])
             family_str = ', '.join([a['family'] for a in authors])
             given_str = ', '.join([a['given'] for a in authors])
             orcid_str = ', '.join([a['orcid'] for a in authors])
             
-            df_csv.loc[df_csv['id'] == doi, 'authors'] = author_str
+            #update the df by locating the where the id column matches the current doi
+            #for each column assigns the corresponding merged string
+            df_csv.loc[df_csv['id'] == doi, 'authors'] = author_str  
             df_csv.loc[df_csv['id'] == doi, 'family'] = family_str
             df_csv.loc[df_csv['id'] == doi, 'given'] = given_str
             df_csv.loc[df_csv['id'] == doi, 'orcid'] = orcid_str
         
-        # Step 3: Normalize Data
-        for doi, venues in data_json['venues_id'].items():
-            df_csv.loc[df_csv['id'] == doi, 'venues_id'] = ', '.join(venues)
+        # Step 3: Normalize Data within df_csv
+        #doi: publication identifier, venues: list of venue ids
+        for doi, venues in data_json['venues_id'].items(): #iterates through the items in venue_id dict
+            df_csv.loc[df_csv['id'] == doi, 'venues_id'] = ', '.join(venues) #locates the rows where 'id' matches the current 'doi', the identifiers are joined into a single string assigned to the venues_id df
         
         for doi, refs in data_json['references'].items():
             df_csv.loc[df_csv['id'] == doi, 'references'] = ', '.join(refs)
         
         # Step 4: Upload to Database
         conn = sqlite3.connect(self.dbPath)
-        df_csv.to_sql('Publications', conn, if_exists='replace', index=False)
+        df_csv.to_sql('Publications', conn, if_exists='replace', index=False) #transfer the content of df_csv to sqlite database
         conn.close()
     
         # Store the merged DataFrame

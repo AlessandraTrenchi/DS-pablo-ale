@@ -204,6 +204,3 @@ Overall, this script facilitates the parsing of both CSV and JSON data, making i
 
 The `TriplestoreDataProcessor` class is designed to interact with a triplestore by uploading, querying, and managing data in a semantic triple format. This class provides various methods to work with RDF data. It has attributes for specifying the SPARQL endpoint URL, base URI, custom base URI, and a mapping between CSV column names and RDF URIs.
 
----
-
-With this restructured documentation, readers can follow a logical flow, starting with an understanding of the software's purpose and the basics of relational databases, then delving into data processing, database population, and triplestore interaction. Each section is clearly defined, and the role of specific classes and functions in the software is well-documented.
