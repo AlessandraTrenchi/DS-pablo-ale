@@ -867,8 +867,8 @@ if __name__ == "__main__":
     
     # ... (existing code for uploading data)
     
-    csv_file = '/Users/juanpablocasadobissone/Downloads/data/relational_publications.csv'
-    json_file = '/Users/juanpablocasadobissone/Downloads/data/relational_other_data.json'
+    csv_file = '/data/relational_publications.csv'
+    json_file = '/data/relational_other_data.json'
     rel_dp.uploadData(csv_file, json_file)  
     print("Uploading data to RelationalDataProcessor...")
 
@@ -880,8 +880,8 @@ if __name__ == "__main__":
     # ... (existing code for uploading data)
     
     print("Uploading data and generating triples...")
-    csv_path = "/Users/juanpablocasadobissone/Downloads/graph_publications.csv"
-    json_path = "/Users/juanpablocasadobissone/Downloads/graph_other_data copy.json"
+    csv_path = "/data/graph_publications.csv"
+    json_path = "/data/graph_other_data copy.json"
     triples = graph_data_processor.uploadData(csv_path, json_path)
     
     if triples:
