@@ -143,7 +143,7 @@ class RelationalQueryProcessor(RelationalDataProcessor):
         self.ensureDbConnection()
         query = """
         SELECT venues_id,
-               SUM(
+               SUM( 
                    CASE
                        WHEN "references" IS NOT NULL AND "references" != '' THEN LENGTH("references") - LENGTH(REPLACE("references", ',', '')) + 1
                        ELSE 0
@@ -153,8 +153,12 @@ class RelationalQueryProcessor(RelationalDataProcessor):
         GROUP BY venues_id
         ORDER BY total_citations DESC;
         """
-        return pd.read_sql_query(query, self.db_connection)
-
+        #calculates the total number of citations for each venue (sum)
+        #counts the number of commas in the references column
+        #group by venue_id to get a summary for each unique venue
+        #orders descendingly 
+        return pd.read_sql_query(query, self.db_connection) 
+        # Returns the results as a Pandas DataFrame containing information about venues and their total citation
 
     def getVenuesByPublisherId(self, publisher_id):
         self.ensureDbConnection()
