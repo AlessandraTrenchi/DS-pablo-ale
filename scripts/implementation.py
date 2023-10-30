@@ -12,19 +12,19 @@ import sqlite3
 
 
 # RelationalDataProcessor class definition
-class RelationalDataProcessor:
-    def __init__(self, db_path):
-        self.dbPath = db_path
+class RelationalDataProcessor: 
+    def __init__(self, db_path): #db_path is the path to the SQLite database file.
+        self.dbPath = db_path 
         self.merged_df = None  # To store the merged DataFrame
         self.conn = None  # To store the database connection
         
-    def setDbPath(self, new_path):
+    def setDbPath(self, new_path): #allows changes the path
         self.dbPath = new_path
 
     def ensureDbConnection(self):
         if self.conn is None:
             print("Reconnecting to the database...")
-            self.connectDb()
+            self.connectDb() #tries reconnecting
         print(f"Database connection: {self.conn}")
 
     def connectDb(self):
