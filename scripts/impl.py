@@ -204,7 +204,7 @@ class ProceedingsPaper:
         return self.publication_id
 
 
-class RelationalDataProcessor:
+class RelationalDataProcessor (RelationalProcessor):
     def __init__(self, db_path):
         self.db_path = db_path
         self.db_connection = None

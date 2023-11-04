@@ -56,6 +56,7 @@ class RelationalDataProcessor:
         # Step 2: Merge Data into pandas df_csv
         for doi, authors in data_json['authors'].items(): #starts the iteration through the items (key-value pairs)
             author_str = ', '.join([f"{a['given']} {a['family']} ({a['orcid']})" for a in authors])
+            # author_str = "Peroni, Silvio, 0000-"
             family_str = ', '.join([a['family'] for a in authors])
             given_str = ', '.join([a['given'] for a in authors])
             orcid_str = ', '.join([a['orcid'] for a in authors])
